@@ -1,14 +1,14 @@
 ---
-title: "My R Tutorial"
-author: "T. Evgeniou"
-date: "13 Dec 2016"
+title: "Main"
+author: "Group work Busschers, Dherbomez, Mather, Van der Meer"
+date: "25 Jan 2017"
 output:
   html_document: default
   pdf_document: default
   word_document: default
 ---
 
-This is our first document using the process and tools of the BDA course.
+#this is the main document generating the report
 <!-- click the "Knit" button to render the document -->
 
 ### Data
