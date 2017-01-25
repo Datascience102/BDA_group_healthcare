@@ -8,7 +8,7 @@ if (!suppressWarnings(require(git2r))) {
 
 repo <- repository(".")
 if (!("upstream" %in% remotes(repo))) {
-  remote_add(repo, "upstream", "https://github.com/InseadDataAnalytics/INSEADAnalytics")
+  remote_add(repo, "upstream", "https://github.com/sophiedherbomez/BDA_group_healthcare")
 }
 
 conf <- config(repo)
@@ -26,7 +26,7 @@ checkout(repo, "master")
 merge(repo, "upstream/master")
 
 message("
-  Your local copy of INSEADAnalytics is now in sync with the master project.
+  Your local copy of healthcare group project is now in sync with the master project.
   You can update your remote copy by clicking 'Push' in the 'Git' panel or
   by executing the following:
   
