@@ -161,14 +161,13 @@ Adm_inp <- Admissions_3[,c("Age_gender_ID","Age", "Gender", "Nursingdays_per_100
 
 # weighted average to find nursing days in a category, because we want to use bigger categories later
 Adm_inp$Number_of_act = Adm_inp$Nursingdays_per_10000_inhabitants * Adm_inp$Average_poulation/10000
-Adm_inp2
-Adm_inp3 <- aggregate(Number_of_act ~ Age_gender_ID,Adm_inp2, sum,drop=FALSE)                                  
+Adm_inp2 <- Adm_inp[,c("Age_gender_ID","Age", "Gender","Number_of_act")]
+Adm_inp3 <- aggregate(Number_of_act ~ .,Adm_inp2, sum)                                  
                                   #Pop_index <- aggregate(Population_x1000 ~ .,Pop_index_temp, sum)
                                   
                                   
-Adm_inp$Type_act="Nursing_days" # add column
-Adm_inp <- Adm_inp[,c("Age_gender_ID","Age", "Gender", "Number_of_act","Type_act")]
-Adm_inp$Space_per_act = BuildReq[which(BuildReq$Englisch.name.activity.cluster == "Nursing days"),"Total.normative.space"]
+Adm_inp3$Type_act="Nursing_days" # add column
+Adm_inp3$Space_per_act = BuildReq[which(BuildReq$Englisch.name.activity.cluster == "Nursing days"),"Total.normative.space"]
 
 Adm_outp <- Admissions_3[,c("Age_gender_ID","Age", "Gender", "Outpatient_admissions_per_10000_inhabitants", "Average_poulation")]
 Adm_outp$Number_of_act = (as.integer(Adm_outp$Outpatient_admissions_per_10000_inhabitants) * Adm_outp$Average_poulation)/10000
