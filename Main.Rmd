@@ -1,18 +1,13 @@
 ---
-title: "Main - lalalala - lalala""
-author: "Group work Busschers, Dherbomez, Mather, Van der Meer"
-date: "25 Jan 2017"
-output:
-  html_document: default
-  pdf_document: default
-  word_document: default
+title: "Forecast of hospital building requirements in the Netherlands"
+author: "Mather, van der Meer, D'Herbomez, Busschers"
+date: "January 27, 2017"
+output: html_document
 ---
-
-#this is the main document generating the report
-<!-- click the "Knit" button to render the document -->
 
 ### Data
 Let's read some data.
+
 ```{r}
 # population forecast
 Pop <- read.csv("Data/CBS_population forecast per region, gender and age - 2014-2040.csv")
@@ -39,7 +34,7 @@ Age_gender_ID <- read.csv("Data/Age_gender_ID.csv", header=TRUE, sep=",")
 ```
 
 
-```{r}
+```{r, SurgeriesTable}
 # select all rows for which the column surgeries says 'all', year=2010
 # select columns containing 1 age, 2 gender, 3 number of inpatient surgeries and 4 number of outpatient surgeries
 Surgeries_2 <- subset(Surgeries, (Surgery=="All"& Year=="2010"), select=c(Gender,Age,Inpatient_surgeries,Outpatient_surgeries),drop=TRUE)
@@ -66,29 +61,46 @@ Pop_index <- aggregate(Population_x1000 ~ .,Pop_index_temp, sum)
 
 # merge surgeries with a subset of Popindex that contains the data for 2014 and NL
 # note: shortcut of using 2014 population against 2010 numbers, because 2010 is not in the table
+Surgeries_def <- merge(Surgeries_4,subset(Pop_index, (Type.of.region=="Country"& Year=="2014"), select=c(Age_gender_ID,Population_x1000),drop=TRUE), by="Age_gender_ID")
+
+Surgeries_def$Act_per_1000inhab <- as.numeric(Surgeries_def$Number_of_act) / as.numeric(Surgeries_def$Population_x1000)
+
+# add square meter requirement
+Surgeries_def$Space_per_act = BuildReq[which(BuildReq$Englisch.name.activity.cluster == "Surgeries"),"Total.normative.space"]
+```
+
+
+```{r, AdmissionsTable}
+# select all rows for which the column year=2012
+# select columns containing 1 age, 2 gender, 3 number of outpatient admissions per 10000 inhabitants,  4 number of nursing days per 10000
+Admissions_2 <- subset(Admissions, Year=="2012*", select=c(Gender,Age,Outpatient_admissions_per_10000_inhabitants, Nursingdays_per_10000_inhabitants, Average_poulation),drop=TRUE)
+
+# add age_gender_ID
+Admissions_3 <- unique(subset(merge(Admissions_2, Age_gender_ID, by.x=c("Age", "Gender"), by.y=c("Adm_age", "Gender")),select=c("Age_gender_ID","Age","Gender","Outpatient_admissions_per_10000_inhabitants", "Nursingdays_per_10000_inhabitants", "Average_poulation")))
+
+# restructure table such that it contains a column for type of activity, instead of each column being a different activity
+Surgeries_inp <- Surgeries_3[,c("Age_gender_ID","Age", "Gender", "Inpatient_surgeries")]
+colnames(Surgeries_inp) <- c("Age_gender_ID","Age", "Gender", "Number_of_act") # rename column
+Surgeries_inp$Type_act="Inpatient_surg" # add column
+
+Surgeries_outp <- Surgeries_3[,c("Age_gender_ID","Age", "Gender", "Outpatient_surgeries")]
+colnames(Surgeries_outp) <- c("Age_gender_ID","Age", "Gender", "Number_of_act") # rename column
+Surgeries_outp$Type_act="Outpatient_surg" # add column
+
+Surgeries_4 <- rbind(Surgeries_inp,Surgeries_outp)
+
+# add total number of inhabitants per Age_gender_ID
+# first add Index numbers to population table and sum total within ID category
+Pop_index_temp <- subset(merge(Pop, Age_gender_ID, by.x=c("Age", "Gender"), by.y=c("Forecast_age", "Gender")),select=c("Age_gender_ID","Year", "Region", "Type.of.region","Population_x1000"))
+
+Pop_index <- aggregate(Population_x1000 ~ .,Pop_index_temp, sum)
+
+# merge surgeries with a subset of Popindex that contains the data for 2014 and NL
+# note: shortcut of using 2014 population against 2010 numbers, because 2010 is not in the table
 Surgeries_5 <- merge(Surgeries_4,subset(Pop_index, (Type.of.region=="Country"& Year=="2014"), select=c(Age_gender_ID,Population_x1000),drop=TRUE), by="Age_gender_ID")
 
 Surgeries_5$Act_per_1000inhab <- as.numeric(Surgeries_5$Number_of_act) / as.numeric(Surgeries_5$Population_x1000)
 
 # add square meter requirement
 Surgeries_5$Space_per_act = BuildReq[which(BuildReq$Englisch.name.activity.cluster == "Surgeries"),"Total.normative.space"]
-```
-
-
-Here's a sample of our selected columns:
-```{r}
-column_sample <- head(ProjectData[, correlation_columns])
-knitr::kable(t(column_sample))
-```
-
-### Correlation
-Shorten the column names, for a more convenient display.
-```{r}
-colnames(ProjectData) <- substring(colnames(ProjectData), 1, 4)
-```
-
-Compute the correlation of our selected columns.
-```{r}
-column_correlation <- cor(ProjectData[, correlation_columns])
-print(column_correlation)
 ```
