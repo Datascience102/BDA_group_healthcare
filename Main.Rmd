@@ -1,7 +1,6 @@
 ---
-<<<<<<< HEAD
 title: "Main"
-author: "Group work Busschers, D'herbomez, Mather, Van der Meer"
+author: "Group work Busschers, Dherbomez, Mather, Van der Meer"
 date: "25 Jan 2017"
 output:
   html_document: default
@@ -144,6 +143,8 @@ Surgeries_def$Act_per_1000inhab <- as.numeric(Surgeries_def$Number_of_act) / as.
 
 # add square meter requirement
 Surgeries_def$Space_per_act = BuildReq[which(BuildReq$Englisch.name.activity.cluster == "Surgeries"),"Total.normative.space"]
+
+head(Surgeries_def,5)
 ```
 
 =======
@@ -163,19 +164,20 @@ Adm_inp <- Admissions_3[,c("Age_gender_ID","Age", "Gender", "Nursingdays_per_100
 Adm_inp$Number_of_act = Adm_inp$Nursingdays_per_10000_inhabitants * Adm_inp$Average_poulation/10000
 Adm_inp2 <- Adm_inp[,c("Age_gender_ID","Age", "Gender","Number_of_act")]
 Adm_inp3 <- aggregate(Number_of_act ~ .,Adm_inp2, sum)                                  
-                                  #Pop_index <- aggregate(Population_x1000 ~ .,Pop_index_temp, sum)
-                                  
                                   
 Adm_inp3$Type_act="Nursing_days" # add column
 Adm_inp3$Space_per_act = BuildReq[which(BuildReq$Englisch.name.activity.cluster == "Nursing days"),"Total.normative.space"]
 
 Adm_outp <- Admissions_3[,c("Age_gender_ID","Age", "Gender", "Outpatient_admissions_per_10000_inhabitants", "Average_poulation")]
-Adm_outp$Number_of_act = (as.integer(Adm_outp$Outpatient_admissions_per_10000_inhabitants) * Adm_outp$Average_poulation)/10000
-Adm_outp$Type_act="Outpatient_admissions" # add column
-Adm_outp <- Adm_outp[,c("Age_gender_ID","Age", "Gender", "Number_of_act","Type_act")]
-Adm_outp$Space_per_act = BuildReq[which(BuildReq$Englisch.name.activity.cluster == "Day admissions"),"Total.normative.space"]
 
-Admissions_4 <- rbind(Adm_inp,Adm_outp)
+Adm_outp$Number_of_act = (as.integer(Adm_outp$Outpatient_admissions_per_10000_inhabitants) * Adm_outp$Average_poulation)/10000
+Adm_outp2 <- Adm_outp[,c("Age_gender_ID","Age", "Gender","Number_of_act")]
+Adm_outp3 <- aggregate(Number_of_act ~ .,Adm_outp2, sum)  
+
+Adm_outp3$Type_act="Outpatient_admissions" # add column
+Adm_outp3$Space_per_act = BuildReq[which(BuildReq$Englisch.name.activity.cluster == "Day admissions"),"Total.normative.space"]
+
+Admissions_4 <- rbind(Adm_inp3,Adm_outp3)
 
 # add total number of inhabitants per Age_gender_ID
 
@@ -185,16 +187,17 @@ Admissions_def <- merge(Admissions_4,subset(Pop_index, (Type.of.region=="Country
 
 Admissions_def$Act_per_1000inhab <- as.numeric(Admissions_def$Number_of_act) / as.numeric(Admissions_def$Population_x1000)
 
+head(Admissions_def,5)
 ```
 =====
 Based on the surgery data of 2014 and the population forecast per region from 2014 to 2040, we create a projection of the required surface needed per surgery type
 create a new matrix with columns : year, Region, type_act,Act_per_100 inhab, space/act
 
 
-```{r, Surgery_projection}
+```{r, Surgery_projection, eval=FALSE}
 
 
-surgery_projection <- merge(Pop_index, Surgeries_5,  by.x=c("Age_gender_ID"), by.y=c("Age_gender_ID", "Type_act"),select=c("Year","Region", "Population_x1000", "Act_per_1000inhab","Space_per_act"))
+surgery_projection <- merge(Pop_index, Surgeries_def,  by.x=c("Age_gender_ID"), by.y=c("Age_gender_ID", "Type_act"),select=c("Year","Region", "Population_x1000", "Act_per_1000inhab","Space_per_act"))
 
 ```
 ##3. Sanity checks 
@@ -203,6 +206,8 @@ surgery_projection <- merge(Pop_index, Surgeries_5,  by.x=c("Age_gender_ID"), by
 ##4.	Data summary and visualization
 
 ```{r}
+library(pyramid)
+
 pop_graph <- subset(Pop, (Age=="0 tot 5 jaar" |  Age=="5 tot 10 jaar"|  Age=="10 tot 15 jaar"|  Age=="15 tot 20 jaar"|  Age=="20 tot 25 jaar"|  Age=="25 tot 30 jaar"|  Age=="30 tot 35 jaar"|  Age=="35 tot 40 jaar"|  Age=="40 tot 45 jaar"|  Age=="45 tot 50 jaar"|  Age=="50 tot 55 jaar"|  Age=="55 tot 60 jaar"|  Age=="60 tot 65 jaar"|  Age=="65 tot 70 jaar"|  Age=="70 tot 75 jaar"|  Age=="75 tot 80 jaar"|  Age=="80 tot 85 jaar"|  Age=="85 tot 90 jaar"|  Age=="90 tot 95 jaar"|  Age=="95 jaar of ouder"),select=c(Age, Population_x1000, Type.of.region, Gender, Year), drop = TRUE)
 
 
