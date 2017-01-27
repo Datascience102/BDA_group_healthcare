@@ -202,6 +202,36 @@ surgery_projection <- merge(Pop_index, Surgeries_5,  by.x=c("Age_gender_ID"), by
 
 ##4.	Data summary and visualization
 
+```{r}
+pop_graph <- subset(Pop, (Age=="0 tot 5 jaar" |  Age=="5 tot 10 jaar"|  Age=="10 tot 15 jaar"|  Age=="15 tot 20 jaar"|  Age=="20 tot 25 jaar"|  Age=="25 tot 30 jaar"|  Age=="30 tot 35 jaar"|  Age=="35 tot 40 jaar"|  Age=="40 tot 45 jaar"|  Age=="45 tot 50 jaar"|  Age=="50 tot 55 jaar"|  Age=="55 tot 60 jaar"|  Age=="60 tot 65 jaar"|  Age=="65 tot 70 jaar"|  Age=="70 tot 75 jaar"|  Age=="75 tot 80 jaar"|  Age=="80 tot 85 jaar"|  Age=="85 tot 90 jaar"|  Age=="90 tot 95 jaar"|  Age=="95 jaar of ouder"),select=c(Age, Population_x1000, Type.of.region, Gender, Year), drop = TRUE)
+
+
+pop_graph_men_2014 <- subset(pop_graph, (Type.of.region=="Country" & Year == "2014" & Gender=="Mannen"),select=c(Population_x1000,Age), drop = TRUE)
+
+pop_graph_women_2014 <- subset(pop_graph, (Type.of.region=="Country" & Year == "2014" & Gender=="Vrouwen"),select=c(Population_x1000, Age), drop = TRUE)
+
+pop_graph_men_2040 <- subset(pop_graph, (Type.of.region=="Country" & Year == "2040" & Gender=="Mannen"),select=c(Population_x1000,Age), drop = TRUE)
+
+pop_graph_women_2040 <- subset(pop_graph, (Type.of.region=="Country" & Year == "2040" & Gender=="Vrouwen"),select=c(Population_x1000,Age), drop = TRUE)
+
+Pop_graph_2014<- merge(pop_graph_men_2014, pop_graph_women_2014, by= "Age")
+Pop_graph_2014_ordered <- Pop_graph_2014[,c(2,3,1)]
+
+pyramid(Pop_graph_2014_ordered, Laxis=NULL, Raxis=NULL,
+AxisFM="g", AxisBM="", AxisBI=3, Cgap=0.6, Cstep=0.5, Csize=1,
+Llab="Males", Rlab="Females", Clab="Ages", GL=TRUE, Cadj=-0.03,
+Lcol="Cyan", Rcol="Pink", Ldens=-1, Rdens=-1, main="Population 2014")
+
+Pop_graph_2040<- merge(pop_graph_men_2040, pop_graph_women_2040, by= "Age")
+Pop_graph_2040_ordered <- Pop_graph_2040[,c(2,3,1)]
+
+pyramid(Pop_graph_2040_ordered, Laxis=NULL, Raxis=NULL,
+AxisFM="g", AxisBM="", AxisBI=3, Cgap=0.6, Cstep=0.5, Csize=1,
+Llab="Males", Rlab="Females", Clab="Ages", GL=TRUE, Cadj=-0.03,
+Lcol="Cyan", Rcol="Pink", Ldens=-1, Rdens=-1, main="Population 2040")
+
+```
+
 ##5.	Assumptions and matching
 
 ##6.	Calculations:
