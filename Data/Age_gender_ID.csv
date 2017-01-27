@@ -1,0 +1,43 @@
+Gender,Forecast_age,Adm_age,Surg_Age,Age_gender_ID
+Mannen,Totaal leeftijd,,,0
+Mannen,0 tot 5 jaar,0 jaar,0 tot 20 jaar,1
+Mannen,5 tot 10 jaar,1 tot 20 jaar,0 tot 20 jaar,1
+Mannen,10 tot 15 jaar,1 tot 20 jaar,0 tot 20 jaar,1
+Mannen,15 tot 20 jaar,1 tot 20 jaar,0 tot 20 jaar,1
+Mannen,20 tot 25 jaar,20 tot 45 jaar,20 tot 45 jaar,2
+Mannen,25 tot 30 jaar,20 tot 45 jaar,20 tot 45 jaar,2
+Mannen,30 tot 35 jaar,20 tot 45 jaar,20 tot 45 jaar,2
+Mannen,35 tot 40 jaar,20 tot 45 jaar,20 tot 45 jaar,2
+Mannen,40 tot 45 jaar,20 tot 45 jaar,20 tot 45 jaar,2
+Mannen,45 tot 50 jaar,45 tot 65 jaar,45 tot 65 jaar,3
+Mannen,50 tot 55 jaar,45 tot 65 jaar,45 tot 65 jaar,3
+Mannen,55 tot 60 jaar,45 tot 65 jaar,45 tot 65 jaar,3
+Mannen,60 tot 65 jaar,45 tot 65 jaar,45 tot 65 jaar,3
+Mannen,65 tot 70 jaar,65 tot 80 jaar,65 tot 80 jaar,4
+Mannen,70 tot 75 jaar,65 tot 80 jaar,65 tot 80 jaar,4
+Mannen,75 tot 80 jaar,65 tot 80 jaar,65 tot 80 jaar,4
+Mannen,80 tot 85 jaar,80 jaar of ouder,80 jaar of ouder,5
+Mannen,85 tot 90 jaar,80 jaar of ouder,80 jaar of ouder,5
+Mannen,90 tot 95 jaar,80 jaar of ouder,80 jaar of ouder,5
+Mannen,95 jaar of ouder,80 jaar of ouder,80 jaar of ouder,5
+Vrouwen,Totaal leeftijd,,,100
+Vrouwen,0 tot 5 jaar,0 jaar,0 tot 20 jaar,6
+Vrouwen,5 tot 10 jaar,1 tot 20 jaar,0 tot 20 jaar,6
+Vrouwen,10 tot 15 jaar,1 tot 20 jaar,0 tot 20 jaar,6
+Vrouwen,15 tot 20 jaar,1 tot 20 jaar,0 tot 20 jaar,6
+Vrouwen,20 tot 25 jaar,20 tot 45 jaar,20 tot 45 jaar,7
+Vrouwen,25 tot 30 jaar,20 tot 45 jaar,20 tot 45 jaar,7
+Vrouwen,30 tot 35 jaar,20 tot 45 jaar,20 tot 45 jaar,7
+Vrouwen,35 tot 40 jaar,20 tot 45 jaar,20 tot 45 jaar,7
+Vrouwen,40 tot 45 jaar,20 tot 45 jaar,20 tot 45 jaar,7
+Vrouwen,45 tot 50 jaar,45 tot 65 jaar,45 tot 65 jaar,8
+Vrouwen,50 tot 55 jaar,45 tot 65 jaar,45 tot 65 jaar,8
+Vrouwen,55 tot 60 jaar,45 tot 65 jaar,45 tot 65 jaar,8
+Vrouwen,60 tot 65 jaar,45 tot 65 jaar,45 tot 65 jaar,8
+Vrouwen,65 tot 70 jaar,65 tot 80 jaar,65 tot 80 jaar,9
+Vrouwen,70 tot 75 jaar,65 tot 80 jaar,65 tot 80 jaar,9
+Vrouwen,75 tot 80 jaar,65 tot 80 jaar,65 tot 80 jaar,9
+Vrouwen,80 tot 85 jaar,80 jaar of ouder,80 jaar of ouder,10
+Vrouwen,85 tot 90 jaar,80 jaar of ouder,80 jaar of ouder,10
+Vrouwen,90 tot 95 jaar,80 jaar of ouder,80 jaar of ouder,10
+,,80 jaar of ouder,80 jaar of ouder,10
