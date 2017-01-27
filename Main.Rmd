@@ -76,31 +76,37 @@ Surgeries_def$Space_per_act = BuildReq[which(BuildReq$Englisch.name.activity.clu
 Admissions_2 <- subset(Admissions, Year=="2012*", select=c(Gender,Age,Outpatient_admissions_per_10000_inhabitants, Nursingdays_per_10000_inhabitants, Average_poulation),drop=TRUE)
 
 # add age_gender_ID
-Admissions_3 <- unique(subset(merge(Admissions_2, Age_gender_ID, by.x=c("Age", "Gender"), by.y=c("Adm_age", "Gender")),select=c("Age_gender_ID","Age","Gender","Outpatient_admissions_per_10000_inhabitants", "Nursingdays_per_10000_inhabitants", "Average_poulation")))
+Admissions_3 <- unique(subset(merge(Admissions_2, Age_gender_ID, by.x=c("Age", "Gender"), by.y=c("Adm_age", "Gender")),select=c("Age_gender_ID","Surg_Age","Gender","Outpatient_admissions_per_10000_inhabitants", "Nursingdays_per_10000_inhabitants", "Average_poulation")))
+colnames(Admissions_3)<-c("Age_gender_ID","Age","Gender","Outpatient_admissions_per_10000_inhabitants", "Nursingdays_per_10000_inhabitants", "Average_poulation")
 
 # restructure table such that it contains a column for type of activity, instead of each column being a different activity
-Surgeries_inp <- Surgeries_3[,c("Age_gender_ID","Age", "Gender", "Inpatient_surgeries")]
-colnames(Surgeries_inp) <- c("Age_gender_ID","Age", "Gender", "Number_of_act") # rename column
-Surgeries_inp$Type_act="Inpatient_surg" # add column
+Adm_inp <- Admissions_3[,c("Age_gender_ID","Age", "Gender", "Nursingdays_per_10000_inhabitants", "Average_poulation")]
 
-Surgeries_outp <- Surgeries_3[,c("Age_gender_ID","Age", "Gender", "Outpatient_surgeries")]
-colnames(Surgeries_outp) <- c("Age_gender_ID","Age", "Gender", "Number_of_act") # rename column
-Surgeries_outp$Type_act="Outpatient_surg" # add column
+# weighted average to find nursing days in a category, because we want to use bigger categories later
+Adm_inp$Number_of_act = Adm_inp$Nursingdays_per_10000_inhabitants * Adm_inp$Average_poulation/10000
+Adm_inp2
+Adm_inp3 <- aggregate(Number_of_act ~ Age_gender_ID,Adm_inp2, sum,drop=FALSE)                                  
+                                  #Pop_index <- aggregate(Population_x1000 ~ .,Pop_index_temp, sum)
+                                  
+                                  
+Adm_inp$Type_act="Nursing_days" # add column
+Adm_inp <- Adm_inp[,c("Age_gender_ID","Age", "Gender", "Number_of_act","Type_act")]
+Adm_inp$Space_per_act = BuildReq[which(BuildReq$Englisch.name.activity.cluster == "Nursing days"),"Total.normative.space"]
 
-Surgeries_4 <- rbind(Surgeries_inp,Surgeries_outp)
+Adm_outp <- Admissions_3[,c("Age_gender_ID","Age", "Gender", "Outpatient_admissions_per_10000_inhabitants", "Average_poulation")]
+Adm_outp$Number_of_act = (as.integer(Adm_outp$Outpatient_admissions_per_10000_inhabitants) * Adm_outp$Average_poulation)/10000
+Adm_outp$Type_act="Outpatient_admissions" # add column
+Adm_outp <- Adm_outp[,c("Age_gender_ID","Age", "Gender", "Number_of_act","Type_act")]
+Adm_outp$Space_per_act = BuildReq[which(BuildReq$Englisch.name.activity.cluster == "Day admissions"),"Total.normative.space"]
+
+Admissions_4 <- rbind(Adm_inp,Adm_outp)
 
 # add total number of inhabitants per Age_gender_ID
-# first add Index numbers to population table and sum total within ID category
-Pop_index_temp <- subset(merge(Pop, Age_gender_ID, by.x=c("Age", "Gender"), by.y=c("Forecast_age", "Gender")),select=c("Age_gender_ID","Year", "Region", "Type.of.region","Population_x1000"))
-
-Pop_index <- aggregate(Population_x1000 ~ .,Pop_index_temp, sum)
 
 # merge surgeries with a subset of Popindex that contains the data for 2014 and NL
 # note: shortcut of using 2014 population against 2010 numbers, because 2010 is not in the table
-Surgeries_5 <- merge(Surgeries_4,subset(Pop_index, (Type.of.region=="Country"& Year=="2014"), select=c(Age_gender_ID,Population_x1000),drop=TRUE), by="Age_gender_ID")
+Admissions_def <- merge(Admissions_4,subset(Pop_index, (Type.of.region=="Country"& Year=="2014"), select=c(Age_gender_ID,Population_x1000),drop=TRUE), by="Age_gender_ID")
 
-Surgeries_5$Act_per_1000inhab <- as.numeric(Surgeries_5$Number_of_act) / as.numeric(Surgeries_5$Population_x1000)
+Admissions_def$Act_per_1000inhab <- as.numeric(Admissions_def$Number_of_act) / as.numeric(Admissions_def$Population_x1000)
 
-# add square meter requirement
-Surgeries_5$Space_per_act = BuildReq[which(BuildReq$Englisch.name.activity.cluster == "Surgeries"),"Total.normative.space"]
 ```
