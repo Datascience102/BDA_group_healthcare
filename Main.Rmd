@@ -1,4 +1,78 @@
 ---
+<<<<<<< HEAD
+title: "Main"
+author: "Group work Busschers, D'herbomez, Mather, Van der Meer"
+date: "25 Jan 2017"
+output:
+  html_document: default
+  pdf_document: default
+  word_document: default
+---
+
+<!-- this is the main document generating the report
+click the "Knit" button to render the document -->
+
+#**Part 1.** Introduction to our Business Project
+##Objective 
+**predict hospital capacity need and composition for (area’s in) the Netherlands for the next 25 years.**
+Broadly, a hospital consists of 6 different parts, which have very different usage, building requirements and costs:
+1.	Outpatient beds
+2.	Inpatient beds
+3.	Outpatient operating rooms
+4.	Inpatient operating rooms
+5.	Consultation rooms
+6.	Imaging diagnostics labs
+
+##Business use
+A number of stakeholders would use these predictions for their decision-making process. Building a new hospital or rebuilding an outmoded hospital is a very expensive process (~200-500M EUR) with a long lead time (from design to finish ~5 years). This brings along significant uncertainty of the future demand. Hospitals are developed for a usage period of about 20-30 years. Therefore, different parties, directly and indirectly, involved in the building and financing of a hospital benefit from better estimations of the future demand for the hospital:
+
+1.	Hospitals: deciding on (re)building a hospital and the size and composition
+2.	Banks: assessing investment proposals
+3.	Insurers: assessing financing decision for (part of) the build, pricing of provided care, contract negotiations with hospitals
+4.	(Local) governments: assessing financing decision for (part of) the build, assessing whether care is sufficiently ensured for the inhabitants
+
+
+##Data 
+All data is publicly available through www.cbs.nl and www.opendis.nl. We will use three different types of data:
+
+1.	Registered care activities per age and gender for the years 2012-2015. This data is in multiple different files: 
+    a.	hospital admissions (inpatient and outpatient) per age and gender
+    b.	surgeries (inpatient and outpatient) per age and gender
+    c.	all activities categorized in 11 categories, not per age and gender. Here fore we will make the assumption that the distribution is equal to that of admissions
+2.	Number of square meters needed per building element and single care activity in a year
+3.	Forecast of demography of the population (age and gender) for the years 2015-2040.
+
+
+##Process
+1.	Collect data from the different sources
+2.	Clean the data (for example remove double headers)
+3.	Do sanity checks and cross check the data against each other (for example, there should be ~17M people in 2017 in the country)
+4.	Visualize and summarize the data
+5.	Check how data can be matched and which assumptions are needed (for example for outpatient visits, we don’t have information on age and gender, so we will assume that distribution is equal to that of outpatient admissions)
+6.	Perform calculations:
+    a.	Count number of activities in 6 categories (outpatient admissions, inpatient nursing days, outpatient surgeries, inpatient surgeries, outpatient visits, imaging diagnostics) per region, age and gender
+    b.	Multiply number of activities with the corresponding space requirement in m2 to get required m2 per type of space, region in Netherlands, gender and age
+    c.	Multiply with demography developments to get required m2 per type of space, region in Netherlands, gender and age for the years 2018-2040.
+7.	Visualize results per year and type of space
+
+
+##Limitations
+*	We don’t know the current capacity, its usage or its life expectancy. So we cannot match the required space to the actual space to determine how much extra should be build for the future.
+*	We assume no impact of innovation of care. However, in practice we have seen that nursing days per admission has steadily decreased. The model could be refined to include assumptions on this.
+*	We have no data on specific zip-codes. Including makes it possible to forecast the space requirement for a specific hospital based on its care region.
+Re-use of model:
+*	Different time horizons
+*	Different countries 
+*	Refining for specific parts of the country, for example the care region of a hospital
+*	Refining for specializations
+*	Different types of care, such as youth care. Activities are different and space requirements as well, but the process is the same
+*	Alternative ‘weighting’ of activities. By using m2 to weight the 6 different types of care, we get a physical result, but we could also weight the activities with average cost to forecast future health expenditure
+
+
+#Part 2. Project analysis
+##1.Data collection
+Let's read some data:
+
 title: "Forecast of hospital building requirements in the Netherlands"
 author: "Mather, van der Meer, D'Herbomez, Busschers"
 date: "January 27, 2017"
@@ -6,9 +80,11 @@ output: html_document
 ---
 
 ### Data
+
 Let's read some data.
 
 ```{r}
+
 # population forecast
 Pop <- read.csv("Data/CBS_population forecast per region, gender and age - 2014-2040.csv")
 
@@ -33,6 +109,7 @@ Ref_Spec <- read.csv("Data/06_REF_SPC.csv", header=TRUE, sep=",")
 Age_gender_ID <- read.csv("Data/Age_gender_ID.csv", header=TRUE, sep=",")
 ```
 
+## 2. Data cleaning
 
 ```{r, SurgeriesTable}
 # select all rows for which the column surgeries says 'all', year=2010
@@ -69,7 +146,7 @@ Surgeries_def$Act_per_1000inhab <- as.numeric(Surgeries_def$Number_of_act) / as.
 Surgeries_def$Space_per_act = BuildReq[which(BuildReq$Englisch.name.activity.cluster == "Surgeries"),"Total.normative.space"]
 ```
 
-
+=======
 ```{r, AdmissionsTable}
 # select all rows for which the column year=2012
 # select columns containing 1 age, 2 gender, 3 number of outpatient admissions per 10000 inhabitants,  4 number of nursing days per 10000
@@ -110,3 +187,48 @@ Admissions_def <- merge(Admissions_4,subset(Pop_index, (Type.of.region=="Country
 Admissions_def$Act_per_1000inhab <- as.numeric(Admissions_def$Number_of_act) / as.numeric(Admissions_def$Population_x1000)
 
 ```
+=====
+Based on the surgery data of 2014 and the population forecast per region from 2014 to 2040, we create a projection of the required surface needed per surgery type
+create a new matrix with columns : year, Region, type_act,Act_per_100 inhab, space/act
+
+
+```{r, Surgery_projection}
+
+
+surgery_projection <- merge(Pop_index, Surgeries_5,  by.x=c("Age_gender_ID"), by.y=c("Age_gender_ID", "Type_act"),select=c("Year","Region", "Population_x1000", "Act_per_1000inhab","Space_per_act"))
+
+```
+##3. Sanity checks 
+
+
+##4.	Data summary and visualization
+
+##5.	Assumptions and matching
+
+##6.	Calculations:
+
+###   a.	Count number of activities in 6 categories (outpatient admissions, inpatient nursing days, outpatient surgeries, inpatient surgeries, outpatient visits, imaging diagnostics) per region, age and gender
+
+###    b.	Multiply number of activities with the corresponding space requirement in m2 to get required m2 per type of space, region in Netherlands, gender and age
+
+##    c.	Multiply with demography developments to get required m2 per type of space, region in Netherlands, gender and age for the years 2018-2040.
+
+##7.	Results Visualization  (per year and type of space)
+
+<!-- Here's a sample of our selected columns: -->
+<!-- ```{r} -->
+<!-- column_sample <- head(ProjectData[, correlation_columns]) -->
+<!-- knitr::kable(t(column_sample)) -->
+<!-- ``` -->
+
+<!-- ### Correlation -->
+<!-- Shorten the column names, for a more convenient display. -->
+<!-- ```{r} -->
+<!-- colnames(ProjectData) <- substring(colnames(ProjectData), 1, 4) -->
+<!-- ``` -->
+
+<!-- Compute the correlation of our selected columns. -->
+<!-- ```{r} -->
+<!-- column_correlation <- cor(ProjectData[, correlation_columns]) -->
+<!-- print(column_correlation) -->
+<!-- ``` -->
