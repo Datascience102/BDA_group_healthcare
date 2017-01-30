@@ -270,7 +270,6 @@ colnames(Consultation_2) <- c("Age_gender_ID","Age", "Gender", "Number_of_act","
 
 Imaging_2 <- subset(Consultation_imaging_ref, select=c("Age_gender_ID","Age","Gender","Activities_img","Type_Act_img"), drop=TRUE)
 
-colnames(Imaging_2) <- c("Age_gender_ID","Age", "Gender", "Number_of_act","Type_act") # rename columns in order to match with other type of activities
 
 Consultation_def <- merge(Consultation_2,subset(Pop_index, (Type.of.region=="Country"& Year=="2014"), select=c(Age_gender_ID,Population_x1000),drop=TRUE), by="Age_gender_ID") # add population numbers
 
@@ -334,8 +333,11 @@ Projection <- merge(Pop_index, Total_activities_2014,  by.x=c("Age_gender_ID"), 
 [...some textual explanation of it...]
 
 ```{r} 
-library(plotly)
-
+library(ggplot2)
+test<- matrix(c(2014,2015,2016,2014,2015,2016,"Diagnostics","Diagnostics","Diagnostics","Surgeries","Surgeries","Surgeries",10,12,19,11,13,17),nrow=6, ncol=3)
+colnames(test)<-c("Year", "Group", "Activity")
+test_graph <- data.frame(test)
+ggplot(test_graph, aes(x=Year,y=Activity,group=Group,fill=Group)) + geom_area() + geom_line(position='stack')
 ```
 
 
