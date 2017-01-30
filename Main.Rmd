@@ -70,7 +70,7 @@ BuildReq <- read.csv("Data/Bouwcollege - m2 per activity.csv", header = TRUE, se
 Surgeries <- read.csv("Data/CBS - surgery outpatient and inpatient per gender and age - 1995 - 2010_v2.csv", header=TRUE, sep=",",dec=".",stringsAsFactors = FALSE)
 
 cols=c("Total_surgeries","Total_surgeries_per_10000_inhabitants","Inpatient_surgeries","Inpatient_surgeries_per_10000_inhabitants","Outpatient_surgeries","Outpatient_surgeries_per_10000_inhabitants")
-Surgeries[,cols] = apply(Surgeries[,cols], 2, function(x) as.numeric(as.character(x)),na.rm = TRUE)
+#Surgeries[,cols] = apply(Surgeries[,cols], 2, function(x) as.numeric(as.character(x)),na.rm = TRUE)
                   
 # number of hospital admissions (inpatient and outpatient) per gender and age in 1981-2012
 Admissions <- read.csv("Data/CBS - hospital admissions per gender and age 1981-2012_v2.csv", header=TRUE, sep=",")
@@ -217,7 +217,7 @@ head(Admissions_def,5)
 ```
 
 ```{r} 
-consultation_imaging_ref <- subset(Surgeries_outp, select=c("Age_gender_ID","Age","Gender","Number_of_act"), drop=TRUE)
+Consultation_imaging_ref <- subset(Surgeries_outp, select=c("Age_gender_ID","Age","Gender","Number_of_act"), drop=TRUE)
 
 Consultation_imaging_ref$Ratio_per_agegroup= as.integer(Surgeries_outp$Number_of_act)/sum(as.integer(Surgeries_outp$Number_of_act))  # add column with ratio per age-group
 
@@ -225,21 +225,21 @@ Consultation_imaging_ref $Type_Act_con="Consultation" # add column for type of a
 
 Consultation_1 <- subset(Act2014, (ZORGPROFIELKLASSE_CD=="1" & JAAR=="2014"), select=c("JAAR","AANTAL_ZAT"), drop=TRUE) # Get total number of activities for this category (consultations)
 
-Consultation_imaging_ref $Activities_con= (Consultation_imaging_ref$Ratio)*sum(Consultation_1)*(Consultation_imaging_ref$Ratio) # Create proxy for number of activities per agegroup and gender based on Outpatient ratio 
+Consultation_imaging_ref$Activities_con=round( (Consultation_imaging_ref$Ratio_per_agegroup)*sum(Consultation_1[,2]),0) # Create proxy for number of activities per agegroup and gender based on Outpatient ratio 
 
-Consultation_imaging_ref $Type_Act_img="Imaging diagnostics" #  add column for type of activity (Imaging)
+Consultation_imaging_ref$Type_Act_img="Imaging diagnostics" #  add column for type of activity (Imaging)
 
 Imaging_1 <- subset(Act2014, (ZORGPROFIELKLASSE_CD=="7" & JAAR=="2014"), select=c("JAAR","AANTAL_ZAT"), drop=TRUE) # Get total number of activities for this category (Imaging)
 
-Consultation_imaging_ref $Activities_img= (Consultation_imaging_ref$Ratio)*sum(Imaging_1)*(Consultation_imaging_ref$Ratio) # Create proxy for number of activities per agegroup and gender based on Outpatient ratio
+Consultation_imaging_ref$Activities_img=round( (Consultation_imaging_ref$Ratio_per_agegroup)*sum(Imaging_1[,2]),0) # Create proxy for number of activities per agegroup and gender based on Outpatient ratio
 
 Consultation_2 <- subset(Consultation_imaging_ref, select=c("Age_gender_ID","Age","Gender","Activities_con","Type_Act_con"), drop=TRUE) # Prepare data for output table to be used in calculations
 
-colnames(Consultation_2) <- c("Age_gender_ID","Age", "Gender", "Number_of_act","Type_Act") # rename column # rename columns in order to match with other type of activities
+colnames(Consultation_2) <- c("Age_gender_ID","Age", "Gender", "Number_of_act","Type_act") # rename column # rename columns in order to match with other type of activities
 
 Imaging_2 <- subset(Consultation_imaging_ref, select=c("Age_gender_ID","Age","Gender","Activities_img","Type_Act_img"), drop=TRUE)
 
-colnames(Imaging_2) <- c("Age_gender_ID","Age", "Gender", "Number_of_act","Type_Act") # rename columns in order to match with other type of activities
+colnames(Imaging_2) <- c("Age_gender_ID","Age", "Gender", "Number_of_act","Type_act") # rename columns in order to match with other type of activities
 
 Consultation_def <- merge(Consultation_2,subset(Pop_index, (Type.of.region=="Country"& Year=="2014"), select=c(Age_gender_ID,Population_x1000),drop=TRUE), by="Age_gender_ID") # add population numbers
 
@@ -252,6 +252,16 @@ Imaging_def <- merge(Imaging_2,subset(Pop_index, (Type.of.region=="Country"& Yea
 Imaging_def$Act_per_1000inhab <- as.numeric(Imaging_def$Number_of_act) / as.numeric(Imaging_def$Population_x1000) # calculate activities per 1000 inhabitants
 
 Imaging_def$Space_per_act = BuildReq[which(BuildReq$Englisch.name.activity.cluster == "Imaging diagnostics"),"Total.normative.space"] # add square meter requirement
+
+head(Consultation_def,5)
+head(Imaging_def,5)
+
+```
+
+```{r}
+library(plyr)
+Total_activities_2014 <- rbind.fill(Consultation_def, Imaging_def, Surgeries_def, Admissions_def)
+Total_activities_2014$Total_space=round((Total_activities_2014$Population_x1000)*(Total_activities_2014$Act_per_1000inhab)* (Total_activities_2014$Space_per_act),0) # Calculate total space needed for every activity in every agegroup for both gender 
 ```
 
 =====
