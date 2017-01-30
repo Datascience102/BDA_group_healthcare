@@ -120,7 +120,14 @@ print(head(Age_gender_ID,5))
 
 ##Sanity checks
 [...add table with some numbers to check...]
+```{r, sanity_check, echo=FALSE}
+#we make a table that summarizes the total number of operations and compare them to what they should be roughly
+#we'll cheat by using the final table to the sanity check at the end
 
+#summary_table <- data.frame(x= numeric(0), y= integer(0), z = character(0))
+#summary_table$Type_act<- c("Consultation","Imaging diagnostics","Inpatient_surg","Outpatient_surg","Nursing_days","Outpatient_admissions")
+
+```
 
 ##Summary and visualisation
 To show how the demography of the population changes, we visualize the composition of the population in 2014 and 2040.
@@ -250,7 +257,7 @@ head(Admissions_def,5)
 ```{r} 
 Consultation_imaging_ref <- subset(Surgeries_outp, select=c("Age_gender_ID","Age","Gender","Number_of_act"), drop=TRUE)
 
-consultation_imaging_ref$Ratio_per_agegroup= as.integer(Surgeries_outp$Number_of_act)/sum(as.integer(Surgeries_outp$Number_of_act))  # add column with ratio per age-group
+Consultation_imaging_ref$Ratio_per_agegroup= as.integer(Surgeries_outp$Number_of_act)/sum(as.integer(Surgeries_outp$Number_of_act))  # add column with ratio per age-group
 
 Consultation_imaging_ref $Type_Act_con="Consultation" # add column for type of activity (consultations)
 
