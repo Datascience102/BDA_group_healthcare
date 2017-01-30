@@ -67,11 +67,30 @@ Pop <- read.csv("Data/CBS_population forecast per region, gender and age - 2014-
 BuildReq <- read.csv("Data/Bouwcollege - m2 per activity.csv", header = TRUE, sep=",")
 
 # number of surgeries performed (inpatient and outpatient) per gender and age in 1995-2010
-Surgeries <- read.csv("Data/CBS - surgery outpatient and inpatient per gender and age - 1995 - 2010_v2.csv", header=TRUE, sep=",",dec=".",stringsAsFactors = FALSE)
+Surgeries <- read.csv("Data/CBS - surgery outpatient and inpatient per gender and age - 1995 - 2010_v2.csv", 
+header=TRUE, sep=",",dec=".",stringsAsFactors = FALSE, na=0)
 
-cols=c("Total_surgeries","Total_surgeries_per_10000_inhabitants","Inpatient_surgeries","Inpatient_surgeries_per_10000_inhabitants","Outpatient_surgeries","Outpatient_surgeries_per_10000_inhabitants")
-Surgeries[,cols] = apply(Surgeries[,cols], 2, function(x) (as.numeric(as.character(x), na.rm = TRUE)))
-                  
+#cols=c("Total_surgeries","Total_surgeries_per_10000_inhabitants","Inpatient_surgeries","Inpatient_surgeries_per_10000_inhabitants","Outpatient_surgeries","Outpatient_surgeries_per_10000_inhabitants")
+
+
+# i=0
+# name=0
+# for (i in 1:length(cols))
+# {
+#   name=cols[i]
+#   Surgeries$name[Surgeries$name=="."]<-0
+# #Surgeries$cols[i][Surgeries$col[i]=="."]<-0
+# }
+
+Surgeries$Total_surgeries[Surgeries$Total_surgeries=="."]<-0
+Surgeries$Total_surgeries_per_10000_inhabitants[Surgeries$Total_surgeries_per_10000_inhabitants=="."]<-0
+Surgeries$Inpatient_surgeries[Surgeries$Inpatient_surgeries=="."]<-0
+Surgeries$Inpatient_surgeries_per_10000_inhabitants[Surgeries$Inpatient_surgeries_per_10000_inhabitants=="."]<-0
+Surgeries$Outpatient_surgeries[Surgeries$Outpatient_surgeries=="."]<-0
+Surgeries$Outpatient_surgeries_per_10000_inhabitants[Surgeries$Outpatient_surgeries_per_10000_inhabitants=="."]<-0
+
+
+
 # number of hospital admissions (inpatient and outpatient) per gender and age in 1981-2012
 Admissions <- read.csv("Data/CBS - hospital admissions per gender and age 1981-2012_v2.csv", header=TRUE, sep=",")
 
@@ -217,7 +236,7 @@ head(Admissions_def,5)
 ```
 
 ```{r} 
-consultation_imaging_ref <- subset(Surgeries_outp, select=c("Age_gender_ID","Age","Gender","Number_of_act"), drop=TRUE)
+Consultation_imaging_ref <- subset(Surgeries_outp, select=c("Age_gender_ID","Age","Gender","Number_of_act"), drop=TRUE)
 
 Consultation_imaging_ref$Ratio_per_agegroup= as.integer(Surgeries_outp$Number_of_act)/sum(as.integer(Surgeries_outp$Number_of_act))  # add column with ratio per age-group
 
