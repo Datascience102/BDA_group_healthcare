@@ -70,7 +70,7 @@ BuildReq <- read.csv("Data/Bouwcollege - m2 per activity.csv", header = TRUE, se
 Surgeries <- read.csv("Data/CBS - surgery outpatient and inpatient per gender and age - 1995 - 2010_v2.csv", header=TRUE, sep=",",dec=".",stringsAsFactors = FALSE)
 
 cols=c("Total_surgeries","Total_surgeries_per_10000_inhabitants","Inpatient_surgeries","Inpatient_surgeries_per_10000_inhabitants","Outpatient_surgeries","Outpatient_surgeries_per_10000_inhabitants")
-Surgeries[,cols] = apply(Surgeries[,cols], 2, function(x) as.numeric(as.character(x)),na.rm = TRUE)
+Surgeries[,cols] = apply(Surgeries[,cols], 2, function(x) (as.numeric(as.character(x), na.rm = TRUE)))
                   
 # number of hospital admissions (inpatient and outpatient) per gender and age in 1981-2012
 Admissions <- read.csv("Data/CBS - hospital admissions per gender and age 1981-2012_v2.csv", header=TRUE, sep=",")
