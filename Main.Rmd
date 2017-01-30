@@ -120,7 +120,14 @@ print(head(Age_gender_ID,5))
 
 ##Sanity checks
 [...add table with some numbers to check...]
+```{r, sanity_check, echo=FALSE}
+#we make a table that summarizes the total number of operations and compare them to what they should be roughly
+#we'll cheat by using the final table to the sanity check at the end
 
+#summary_table <- data.frame(x= numeric(0), y= integer(0), z = character(0))
+#summary_table$Type_act<- c("Consultation","Imaging diagnostics","Inpatient_surg","Outpatient_surg","Nursing_days","Outpatient_admissions")
+
+```
 
 ##Summary and visualisation
 To show how the demography of the population changes, we visualize the composition of the population in 2014 and 2040.
@@ -270,7 +277,6 @@ colnames(Consultation_2) <- c("Age_gender_ID","Age", "Gender", "Number_of_act","
 
 Imaging_2 <- subset(Consultation_imaging_ref, select=c("Age_gender_ID","Age","Gender","Activities_img","Type_Act_img"), drop=TRUE)
 
-colnames(Imaging_2) <- c("Age_gender_ID","Age", "Gender", "Number_of_act","Type_act") # rename columns in order to match with other type of activities
 
 Consultation_def <- merge(Consultation_2,subset(Pop_index, (Type.of.region=="Country"& Year=="2014"), select=c(Age_gender_ID,Population_x1000),drop=TRUE), by="Age_gender_ID") # add population numbers
 
@@ -337,6 +343,15 @@ Projection <- merge(Pop_index, Total_activities_2014,  by.x=c("Age_gender_ID","Y
 [...table and visualisation of results...]
 [...some textual explanation of it...]
 
+```{r} 
+library(ggplot2)
+test<- matrix(c(2014,2015,2016,2014,2015,2016,"Diagnostics","Diagnostics","Diagnostics","Surgeries","Surgeries","Surgeries",10,12,19,11,13,17),nrow=6, ncol=3)
+colnames(test)<-c("Year", "Group", "Activity")
+test_graph <- data.frame(test)
+ggplot(test_graph, aes(x=Year,y=Activity,group=Group,fill=Group)) + geom_area() + geom_line(position='stack')
+```
+
+
 #**Part 6.** Usage of process and results
 
 ##Limitations
@@ -355,4 +370,3 @@ We can use the same process for different data sets and purposes:
 4.  Refining for specializations
 5.  Different types of care, such as youth care. Activities are different and space requirements as well, but the process is the same
 6.  Alternative ‘weighting’ of activities. By using m2 to weight the 6 different types of care, we get a physical result, but we could also weight the activities with average cost to forecast future health expenditure.
-
