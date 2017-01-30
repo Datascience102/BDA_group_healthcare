@@ -250,7 +250,7 @@ head(Admissions_def,5)
 ```{r} 
 Consultation_imaging_ref <- subset(Surgeries_outp, select=c("Age_gender_ID","Age","Gender","Number_of_act"), drop=TRUE)
 
-consultation_imaging_ref$Ratio_per_agegroup= as.integer(Surgeries_outp$Number_of_act)/sum(as.integer(Surgeries_outp$Number_of_act))  # add column with ratio per age-group
+Consultation_imaging_ref$Ratio_per_agegroup= as.integer(Surgeries_outp$Number_of_act)/sum(as.integer(Surgeries_outp$Number_of_act))  # add column with ratio per age-group
 
 Consultation_imaging_ref $Type_Act_con="Consultation" # add column for type of activity (consultations)
 
@@ -291,8 +291,12 @@ head(Imaging_def,5)
 
 ```{r}
 library(plyr)
+
 Total_activities_2014 <- rbind.fill(Consultation_def, Imaging_def, Surgeries_def, Admissions_def)
 Total_activities_2014$Total_space=round((Total_activities_2014$Population_x1000)*(Total_activities_2014$Act_per_1000inhab)* (Total_activities_2014$Space_per_act),0) # Calculate total space needed for every activity in every agegroup for both gender 
+
+Total_activities_2014$Year=2014 #  add column to label the data as Year 2014
+
 ```
 
 =====
@@ -317,7 +321,7 @@ create a new matrix with columns : year, Region, type_act,Act_per_1000 inhab, sp
 ```{r, Projection, eval=FALSE}
 cproj=c("Year", "Region", "Activity", )
 
-Projection <- merge(Pop_index, Total_activities_2014,  by.x=c("Age_gender_ID"), by.y=c("Age_gender_ID", "Type_act"),select=c("Year","Region", "Population_x1000", "Act_per_1000inhab","Space_per_act"))
+Projection <- merge(Pop_index, Total_activities_2014,  by.x=c("Age_gender_ID","Year"), by.y=c("Age_gender_ID", "Year"),select=c("Year","Region", "Population_x1000", "Act_per_1000inhab","Space_per_act"))
 
 ```
 
