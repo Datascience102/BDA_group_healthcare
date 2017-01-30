@@ -67,8 +67,11 @@ Pop <- read.csv("Data/CBS_population forecast per region, gender and age - 2014-
 BuildReq <- read.csv("Data/Bouwcollege - m2 per activity.csv", header = TRUE, sep=",")
 
 # number of surgeries performed (inpatient and outpatient) per gender and age in 1995-2010
-Surgeries <- read.csv("Data/CBS - surgery outpatient and inpatient per gender and age - 1995 - 2010_v2.csv", header=TRUE, sep=",")
+Surgeries <- read.csv("Data/CBS - surgery outpatient and inpatient per gender and age - 1995 - 2010_v2.csv", header=TRUE, sep=",",dec=".",stringsAsFactors = FALSE)
 
+cols=c("Total_surgeries","Total_surgeries_per_10000_inhabitants","Inpatient_surgeries","Inpatient_surgeries_per_10000_inhabitants","Outpatient_surgeries","Outpatient_surgeries_per_10000_inhabitants")
+Surgeries[,cols] = apply(Surgeries[,cols], 2, function(x) as.numeric(as.character(x)),na.rm = TRUE)
+                  
 # number of hospital admissions (inpatient and outpatient) per gender and age in 1981-2012
 Admissions <- read.csv("Data/CBS - hospital admissions per gender and age 1981-2012_v2.csv", header=TRUE, sep=",")
 
@@ -127,6 +130,13 @@ Lcol="Cyan", Rcol="Pink", Ldens=-1, Rdens=-1, main="Population 2040")
 #**Part 4.** Calculations
 ##Preparation of data
 [...Text explaining what happens here...]
+```{r,add_ID_age_gender,echo=FALSE}
+
+# add Index numbers to population table and sum total within ID category
+Pop_index_temp <- subset(merge(Pop, Age_gender_ID, by.x=c("Age", "Gender"), by.y=c("Forecast_age", "Gender")),select=c("Age_gender_ID","Year", "Region", "Type.of.region","Population_x1000"))
+
+Pop_index <- aggregate(Population_x1000 ~ .,Pop_index_temp, sum)
+```
 
 ```{r, SurgeriesTable, echo=FALSE}
 # select all rows for which the column surgeries says 'all', year=2010
@@ -148,10 +158,6 @@ Surgeries_outp$Type_act="Outpatient_surg" # add column
 Surgeries_4 <- rbind(Surgeries_inp,Surgeries_outp)
 
 # add total number of inhabitants per Age_gender_ID
-# first add Index numbers to population table and sum total within ID category
-Pop_index_temp <- subset(merge(Pop, Age_gender_ID, by.x=c("Age", "Gender"), by.y=c("Forecast_age", "Gender")),select=c("Age_gender_ID","Year", "Region", "Type.of.region","Population_x1000"))
-
-Pop_index <- aggregate(Population_x1000 ~ .,Pop_index_temp, sum)
 
 # merge surgeries with a subset of Popindex that contains the data for 2014 and NL
 # note: shortcut of using 2014 population against 2010 numbers, because 2010 is not in the table
@@ -204,6 +210,8 @@ Admissions_4 <- rbind(Adm_inp3,Adm_outp3)
 Admissions_def <- merge(Admissions_4,subset(Pop_index, (Type.of.region=="Country"& Year=="2014"), select=c(Age_gender_ID,Population_x1000),drop=TRUE), by="Age_gender_ID")
 
 Admissions_def$Act_per_1000inhab <- as.numeric(Admissions_def$Number_of_act) / as.numeric(Admissions_def$Population_x1000)
+
+Admissions_def <- Admissions_def[,c("Age_gender_ID","Age","Gender","Number_of_act","Type_act","Population_x1000","Act_per_1000inhab","Space_per_act")]
 
 head(Admissions_def,5)
 ```
