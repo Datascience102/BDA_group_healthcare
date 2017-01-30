@@ -62,29 +62,59 @@ We read our data files. [... more explanation on which data sets exactly?....]
 
 # population forecast
 Pop <- read.csv("Data/CBS_population forecast per region, gender and age - 2014-2040.csv")
+print(head(Pop,5))
 
 # m2 required per activity
 BuildReq <- read.csv("Data/Bouwcollege - m2 per activity.csv", header = TRUE, sep=",")
+print(head(BuildReq,5))
 
 # number of surgeries performed (inpatient and outpatient) per gender and age in 1995-2010
-Surgeries <- read.csv("Data/CBS - surgery outpatient and inpatient per gender and age - 1995 - 2010_v2.csv", header=TRUE, sep=",",dec=".",stringsAsFactors = FALSE)
+Surgeries <- read.csv("Data/CBS - surgery outpatient and inpatient per gender and age - 1995 - 2010_v2.csv",
+header=TRUE, sep=",",dec=".",stringsAsFactors = FALSE, na=0)
+ 
+#cols=c("Total_surgeries","Total_surgeries_per_10000_inhabitants","Inpatient_surgeries","Inpatient_surgeries_per_10000_inhabitants","Outpatient_surgeries","Outpatient_surgeries_per_10000_inhabitants")
+ 
+ 
+# i=0
+# name=0
+# for (i in 1:length(cols))
+# {
+#   name=cols[i]
+#   Surgeries$name[Surgeries$name=="."]<-0
+# #Surgeries$cols[i][Surgeries$col[i]=="."]<-0
+# }
+ 
+Surgeries$Total_surgeries[Surgeries$Total_surgeries=="."]<-0
+Surgeries$Total_surgeries_per_10000_inhabitants[Surgeries$Total_surgeries_per_10000_inhabitants=="."]<-0
+Surgeries$Inpatient_surgeries[Surgeries$Inpatient_surgeries=="."]<-0
+Surgeries$Inpatient_surgeries_per_10000_inhabitants[Surgeries$Inpatient_surgeries_per_10000_inhabitants=="."]<-0
+Surgeries$Outpatient_surgeries[Surgeries$Outpatient_surgeries=="."]<-0
+Surgeries$Outpatient_surgeries_per_10000_inhabitants[Surgeries$Outpatient_surgeries_per_10000_inhabitants=="."]<-0
 
-cols=c("Total_surgeries","Total_surgeries_per_10000_inhabitants","Inpatient_surgeries","Inpatient_surgeries_per_10000_inhabitants","Outpatient_surgeries","Outpatient_surgeries_per_10000_inhabitants")
-#Surgeries[,cols] = apply(Surgeries[,cols], 2, function(x) as.numeric(as.character(x)),na.rm = TRUE)
-                  
+print(head(Surgeries,5))
+
+                 
+
 # number of hospital admissions (inpatient and outpatient) per gender and age in 1981-2012
 Admissions <- read.csv("Data/CBS - hospital admissions per gender and age 1981-2012_v2.csv", header=TRUE, sep=",")
+print(head(Admissions,5))
 
 # number of detailed activities per specialisation, DOT
 Act2014 <- read.csv("Data/02_DBC_PROFIEL_2014.csv", header=TRUE, sep=",")
+print(head(Act2014,5))
 
 # reference tables to interpret the activities, DOT's and specialisations
 Ref_Act <- read.csv("Data/03_REF_ZAT.csv", header=TRUE, sep=",")
+print(head(Ref_Act,5))
 Ref_diag <- read.csv("Data/04_REF_DGN.csv", header=TRUE, sep=",")
+print(head(Ref_diag,5))
 Ref_prod <- read.csv("Data/05_REF_ZPD.csv", header=TRUE, sep=",")
+print(head(Ref_prod,5))
 Ref_Spec <- read.csv("Data/06_REF_SPC.csv", header=TRUE, sep=",")
+print(head(Ref_Spec,5))
 
 Age_gender_ID <- read.csv("Data/Age_gender_ID.csv", header=TRUE, sep=",")
+print(head(Age_gender_ID,5))
 ```
 
 
@@ -129,7 +159,8 @@ Lcol="Cyan", Rcol="Pink", Ldens=-1, Rdens=-1, main="Population 2040")
 
 #**Part 4.** Calculations
 ##Preparation of data
-[...Text explaining what happens here...]
+As visualized above, the raw data that we are getting from the various sources are not homogeneous. we need to organize and combine them in order to be able to use them together and draw the projections up to 2040.
+
 ```{r,add_ID_age_gender,echo=FALSE}
 
 # add Index numbers to population table and sum total within ID category
@@ -219,7 +250,7 @@ head(Admissions_def,5)
 ```{r} 
 Consultation_imaging_ref <- subset(Surgeries_outp, select=c("Age_gender_ID","Age","Gender","Number_of_act"), drop=TRUE)
 
-Consultation_imaging_ref$Ratio_per_agegroup= as.integer(Surgeries_outp$Number_of_act)/sum(as.integer(Surgeries_outp$Number_of_act))  # add column with ratio per age-group
+consultation_imaging_ref$Ratio_per_agegroup= as.integer(Surgeries_outp$Number_of_act)/sum(as.integer(Surgeries_outp$Number_of_act))  # add column with ratio per age-group
 
 Consultation_imaging_ref $Type_Act_con="Consultation" # add column for type of activity (consultations)
 
@@ -280,24 +311,23 @@ c.	Multiply with demography developments to get required m2 per type of space, r
 ...]
 
 Based on the surgery data of 2014 and the population forecast per region from 2014 to 2040, we create a projection of the required surface needed per surgery type
-create a new matrix with columns : year, Region, type_act,Act_per_100 inhab, space/act
+create a new matrix with columns : year, Region, type_act,Act_per_1000 inhab, space/act
 
 
-```{r, Surgery_projection, eval=FALSE}
+```{r, Projection, eval=FALSE}
+cproj=c("Year", "Region", "Activity", )
 
-
-surgery_projection <- merge(Pop_index, Surgeries_def,  by.x=c("Age_gender_ID"), by.y=c("Age_gender_ID", "Type_act"),select=c("Year","Region", "Population_x1000", "Act_per_1000inhab","Space_per_act"))
+Projection <- merge(Pop_index, Total_activities_2014,  by.x=c("Age_gender_ID"), by.y=c("Age_gender_ID", "Type_act"),select=c("Year","Region", "Population_x1000", "Act_per_1000inhab","Space_per_act"))
 
 ```
 
-<<<<<<< HEAD
 ##5.	Assumptions and matching
 
 
 
 ##6.	Calculations:
 =======
->>>>>>> 05210e54bb2618d26bb7359a6ef7aa38934d9be1
+
 
 #**Part 5.** Results
 [...table and visualisation of results...]
@@ -327,4 +357,3 @@ We can use the same process for different data sets and purposes:
 4.  Refining for specializations
 5.  Different types of care, such as youth care. Activities are different and space requirements as well, but the process is the same
 6.  Alternative ‘weighting’ of activities. By using m2 to weight the 6 different types of care, we get a physical result, but we could also weight the activities with average cost to forecast future health expenditure.
-
