@@ -174,6 +174,7 @@ As visualized above, the raw data that we are getting from the various sources a
 Pop_index_temp <- subset(merge(Pop, Age_gender_ID, by.x=c("Age", "Gender"), by.y=c("Forecast_age", "Gender")),select=c("Age_gender_ID","Year", "Region", "Type.of.region","Population_x1000"))
 
 Pop_index <- aggregate(Population_x1000 ~ .,Pop_index_temp, sum)
+
 ```
 
 ```{r, SurgeriesTable, echo=FALSE}
@@ -299,9 +300,6 @@ head(Imaging_def,5)
 library(plyr)
 
 Total_activities_2014 <- rbind.fill(Consultation_def, Imaging_def, Surgeries_def, Admissions_def)
-Total_activities_2014$Total_space=round((Total_activities_2014$Population_x1000)*(Total_activities_2014$Act_per_1000inhab)* (Total_activities_2014$Space_per_act),0) # Calculate total space needed for every activity in every agegroup for both gender 
-
-Total_activities_2014$Year=2014 #  add column to label the data as Year 2014
 
 ```
 
@@ -320,14 +318,23 @@ c.	Multiply with demography developments to get required m2 per type of space, r
 
 ...]
 
-Based on the surgery data of 2014 and the population forecast per region from 2014 to 2040, we create a projection of the required surface needed per surgery type
-create a new matrix with columns : year, Region, type_act,Act_per_1000 inhab, space/act
 
 
-```{r, Projection, eval=FALSE}
-cproj=c("Year", "Region", "Activity", )
+```{r, Projection, eval=TRUE}
+cproj=c("Year", "Region", "Activity")
+#Generating the global table with projection of space from 2014 to 2040
+Projection <- merge(subset(Pop_index, select=c(Age_gender_ID,Year,Region,Population_x1000 ),drop=TRUE), subset(Total_activities_2014, select=c(Age_gender_ID,Age,Gender,Act_per_1000inhab, Space_per_act),drop=TRUE), by="Age_gender_ID")
+ 
+Projection$Total_space=round((Projection$Population_x1000)*(Projection$Act_per_1000inhab)* (Projection$Space_per_act),0) # Calculate total space needed for every activity in every agegroup for both gender 
 
-Projection <- merge(Pop_index, Total_activities_2014,  by.x=c("Age_gender_ID","Year"), by.y=c("Age_gender_ID", "Year"),select=c("Year","Region", "Population_x1000", "Act_per_1000inhab","Space_per_act"))
+#subset per year, age group, gender, region and activity
+
+head(Projection,5)
+```
+
+Now that we have the detailed projections, we want sum the required surfaces on the Age and Gender to obtain statistics pe Region and Activity
+```{r, Projection, eval=TRUE}
+
 
 ```
 
