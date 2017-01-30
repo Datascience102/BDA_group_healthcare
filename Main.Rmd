@@ -303,6 +303,12 @@ surgery_projection <- merge(Pop_index, Surgeries_def,  by.x=c("Age_gender_ID"), 
 [...table and visualisation of results...]
 [...some textual explanation of it...]
 
+```{r} 
+library(plotly)
+
+```
+
+
 #**Part 6.** Usage of process and results
 
 ##Limitations
