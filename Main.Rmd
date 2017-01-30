@@ -69,16 +69,31 @@ BuildReq <- read.csv("Data/Bouwcollege - m2 per activity.csv", header = TRUE, se
 print(head(BuildReq,5))
 
 # number of surgeries performed (inpatient and outpatient) per gender and age in 1995-2010
-Surgeries <- read.csv("Data/CBS - surgery outpatient and inpatient per gender and age - 1995 - 2010_v2.csv", header=TRUE, sep=",",dec=".",stringsAsFactors = FALSE)
+Surgeries <- read.csv("Data/CBS - surgery outpatient and inpatient per gender and age - 1995 - 2010_v2.csv",
+header=TRUE, sep=",",dec=".",stringsAsFactors = FALSE, na=0)
+ 
+#cols=c("Total_surgeries","Total_surgeries_per_10000_inhabitants","Inpatient_surgeries","Inpatient_surgeries_per_10000_inhabitants","Outpatient_surgeries","Outpatient_surgeries_per_10000_inhabitants")
+ 
+ 
+# i=0
+# name=0
+# for (i in 1:length(cols))
+# {
+#   name=cols[i]
+#   Surgeries$name[Surgeries$name=="."]<-0
+# #Surgeries$cols[i][Surgeries$col[i]=="."]<-0
+# }
+ 
+Surgeries$Total_surgeries[Surgeries$Total_surgeries=="."]<-0
+Surgeries$Total_surgeries_per_10000_inhabitants[Surgeries$Total_surgeries_per_10000_inhabitants=="."]<-0
+Surgeries$Inpatient_surgeries[Surgeries$Inpatient_surgeries=="."]<-0
+Surgeries$Inpatient_surgeries_per_10000_inhabitants[Surgeries$Inpatient_surgeries_per_10000_inhabitants=="."]<-0
+Surgeries$Outpatient_surgeries[Surgeries$Outpatient_surgeries=="."]<-0
+Surgeries$Outpatient_surgeries_per_10000_inhabitants[Surgeries$Outpatient_surgeries_per_10000_inhabitants=="."]<-0
+
 print(head(Surgeries,5))
 
-#cols=c("Total_surgeries","Total_surgeries_per_10000_inhabitants","Inpatient_surgeries","Inpatient_surgeries_per_10000_inhabitants","Outpatient_surgeries","Outpatient_surgeries_per_10000_inhabitants")
-#Surgeries[,cols] = apply(Surgeries[,cols], 2, function(x) as.numeric(as.character(x)),na.rm = TRUE)
-
-
-cols=c("Total_surgeries","Total_surgeries_per_10000_inhabitants","Inpatient_surgeries","Inpatient_surgeries_per_10000_inhabitants","Outpatient_surgeries","Outpatient_surgeries_per_10000_inhabitants")
-#Surgeries[,cols] = apply(Surgeries[,cols], 2, function(x) as.numeric(as.character(x)),na.rm = TRUE)
-                  
+                 
 
 # number of hospital admissions (inpatient and outpatient) per gender and age in 1981-2012
 Admissions <- read.csv("Data/CBS - hospital admissions per gender and age 1981-2012_v2.csv", header=TRUE, sep=",")
@@ -302,7 +317,7 @@ create a new matrix with columns : year, Region, type_act,Act_per_1000 inhab, sp
 ```{r, Projection, eval=FALSE}
 cproj=c("Year", "Region", "Activity", )
 
-Projection <- merge(Pop_index, Surgeries_def,  by.x=c("Age_gender_ID"), by.y=c("Age_gender_ID", "Type_act"),select=c("Year","Region", "Population_x1000", "Act_per_1000inhab","Space_per_act"))
+Projection <- merge(Pop_index, Total_activities_2014,  by.x=c("Age_gender_ID"), by.y=c("Age_gender_ID", "Type_act"),select=c("Year","Region", "Population_x1000", "Act_per_1000inhab","Space_per_act"))
 
 ```
 
