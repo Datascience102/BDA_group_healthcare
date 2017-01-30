@@ -340,6 +340,12 @@ Projection <- merge(Pop_index, Total_activities_2014,  by.x=c("Age_gender_ID"), 
 [...table and visualisation of results...]
 [...some textual explanation of it...]
 
+```{r} 
+library(plotly)
+
+```
+
+
 #**Part 6.** Usage of process and results
 
 ##Limitations
