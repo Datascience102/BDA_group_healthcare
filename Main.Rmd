@@ -321,20 +321,20 @@ c.	Multiply with demography developments to get required m2 per type of space, r
 
 
 
-```{r, Projection, eval=TRUE}
+```{r, Projection, eval=FALSE}
 cproj=c("Year", "Region", "Activity")
 #Generating the global table with projection of space from 2014 to 2040
-Projection <- merge(subset(Pop_index, select=c(Age_gender_ID,Year,Region,Population_x1000 ),drop=TRUE), subset(Total_activities_2014, select=c(Age_gender_ID,Age,Gender,Act_per_1000inhab, Space_per_act),drop=TRUE), by="Age_gender_ID")
+#Projection <- merge(subset(Pop_index, select=c(Age_gender_ID,Year,Region,Population_x1000 ),drop=TRUE), subset(Total_activities_2014, select=c(Age_gender_ID,Age,Gender,Act_per_1000inhab, Space_per_act),drop=TRUE), by="Age_gender_ID")
  
-Projection$Total_space=round((Projection$Population_x1000)*(Projection$Act_per_1000inhab)* (Projection$Space_per_act),0) # Calculate total space needed for every activity in every agegroup for both gender 
+#Projection$Total_space=round((Projection$Population_x1000)*(Projection$Act_per_1000inhab)* (Projection$Space_per_act),0) # Calculate total space needed for every activity in every agegroup for both gender 
 
 #subset per year, age group, gender, region and activity
 
-head(Projection,5)
+#head(Projection,5)
 ```
 
 Now that we have the detailed projections, we want sum the required surfaces on the Age and Gender to obtain statistics pe Region and Activity
-```{r, Projection, eval=TRUE}
+```{r, Projection, eval=False}
 
 
 ```
