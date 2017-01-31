@@ -157,7 +157,7 @@ print(head(Age_gender_ID,5))
 
 
 ##Sanity checks
-[...add table with some numbers to check...]
+
 ```{r, sanity_check, echo=FALSE}
 #we make a table that summarizes the total number of operations and compare them to what they should be roughly
 #we'll cheat by using the final table to the sanity check at the end
@@ -287,20 +287,26 @@ Surgeries_outp <- Surgeries_3[,c("Age_gender_ID","Age", "Gender", "Outpatient_su
 colnames(Surgeries_outp) <- c("Age_gender_ID","Age", "Gender", "Number_of_act") # rename column
 Surgeries_outp$Type_act="Outpatient_surg" # add column
 
-Surgeries_4 <- rbind(Surgeries_inp,Surgeries_outp)
-
-# add total number of inhabitants per Age_gender_ID
+# add total number of inhabitants per Age_gender_ID in two seperate files for inpatient and outpatient surgeries
 
 # merge surgeries with a subset of Popindex that contains the data for 2014 and NL
 # note: shortcut of using 2014 population against 2010 numbers, because 2010 is not in the table
-Surgeries_def <- merge(Surgeries_4,subset(Pop_index, (Type.of.region=="Country"& Year=="2014"), select=c(Age_gender_ID,Population_x1000),drop=TRUE), by="Age_gender_ID")
+Surgeries_def_inp <- merge(Surgeries_inp,subset(Pop_index, (Type.of.region=="Country"& Year=="2014"), select=c(Age_gender_ID,Population_x1000),drop=TRUE), by="Age_gender_ID")
 
-Surgeries_def$Act_per_1000inhab <- as.numeric(Surgeries_def$Number_of_act) / as.numeric(Surgeries_def$Population_x1000)
+Surgeries_def_inp$Act_per_1000inhab <- as.numeric(Surgeries_def_inp$Number_of_act) / as.numeric(Surgeries_def_inp$Population_x1000)
 
 # add square meter requirement
-Surgeries_def$Space_per_act = BuildReq[which(BuildReq$Englisch.name.activity.cluster == "Surgeries"),"Total.normative.space"]
+Surgeries_def_inp$Space_per_act = BuildReq[which(BuildReq$Englisch.name.activity.cluster == "Surgeries"),"Total.normative.space"]
 
-head(Surgeries_def,5)
+Surgeries_def_outp <- merge(Surgeries_outp,subset(Pop_index, (Type.of.region=="Country"& Year=="2014"), select=c(Age_gender_ID,Population_x1000),drop=TRUE), by="Age_gender_ID")
+
+Surgeries_def_outp$Act_per_1000inhab <- as.numeric(Surgeries_def_outp$Number_of_act) / as.numeric(Surgeries_def_outp$Population_x1000)
+
+# add square meter requirement
+Surgeries_def_outp$Space_per_act = BuildReq[which(BuildReq$Englisch.name.activity.cluster == "Surgeries"),"Total.normative.space"]
+
+head(Surgeries_def_inp,5)
+head(Surgeries_def_outp,5)
 ```
 
 =======
