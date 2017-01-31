@@ -278,6 +278,7 @@ colnames(Consultation_2) <- c("Age_gender_ID","Age", "Gender", "Number_of_act","
 
 Imaging_2 <- subset(Consultation_imaging_ref, select=c("Age_gender_ID","Age","Gender","Activities_img","Type_Act_img"), drop=TRUE)
 
+colnames(Imaging_2) <- c("Age_gender_ID","Age", "Gender", "Number_of_act","Type_act") # rename column # rename columns in order to match with other type of activities
 
 Consultation_def <- merge(Consultation_2,subset(Pop_index, (Type.of.region=="Country"& Year=="2014"), select=c(Age_gender_ID,Population_x1000),drop=TRUE), by="Age_gender_ID") # add population numbers
 
