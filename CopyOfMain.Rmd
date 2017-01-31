@@ -1,0 +1,385 @@
+---
+title: "Main"
+author: "Group work Busschers, Dherbomez, Mather, Van der Meer"
+date: "30 Jan 2017"
+output:
+  html_document: default
+  pdf_document: default
+  word_document: default
+---
+
+<!-- this is the main document generating the report
+click the "Knit" button to render the document -->
+
+#**Part 1.** Introduction to the business project
+##Objective 
+The objective is to predict hospital capacity need and composition for (area’s in) the Netherlands for the next 25 years.**
+Broadly, a hospital consists of 6 different parts, which have very different usage, building requirements and costs:
+1.	Outpatient beds
+2.	Inpatient beds
+3.	Outpatient operating rooms
+4.	Inpatient operating rooms
+5.	Consultation rooms
+6.	Imaging diagnostics rooms
+
+##Business use
+A number of stakeholders would use these predictions for their decision-making process. Building a new hospital or rebuilding an outmoded hospital is a very expensive process (~200-500M EUR) with a long lead time (from design to finish ~5 years). This brings along significant uncertainty of the future demand. Hospitals are developed for a usage period of about 20-30 years. Therefore, different parties, directly and indirectly, involved in the building and financing of a hospital benefit from better estimations of the future demand for the hospital:
+
+1.	Hospitals: deciding on (re)building a hospital and the size and composition
+2.	Banks: assessing investment proposals
+3.	Insurers: assessing financing decision for (part of) the build, pricing of provided care, contract negotiations with hospitals
+4.	(Local) governments: assessing financing decision for (part of) the build, assessing whether care is sufficiently ensured for the inhabitants
+
+#**Part 2.** Process
+We follow a number of predefined steps in this project:
+
+1.	Collect data from the different sources
+2.	Clean the data (for example remove double headers)
+3.	Do sanity checks and cross check the data against each other (for example, there should be ~17M people in 2017 in the country)
+4.	Visualize and summarize the data
+5.	Check how data can be matched and which assumptions are needed (for example for outpatient visits, we don’t have information on age and gender, so we will assume that distribution is equal to that of outpatient admissions)
+6.	Perform calculations:
+    a.	Count number of activities in 6 categories (outpatient admissions, inpatient nursing days, outpatient surgeries, inpatient surgeries, outpatient visits, imaging diagnostics) per region, age and gender
+    b.	Multiply number of activities with the corresponding space requirement in m2 to get required m2 per type of space, region in Netherlands, gender and age
+    c.	Multiply with demography developments to get required m2 per type of space, region in Netherlands, gender and age for the years 2018-2040.
+7.	Visualize results per year and type of space
+
+#**Part 3.** Data
+##Description 
+All data is publicly available through www.cbs.nl and www.opendis.nl. We will use three different types of data:
+
+1.	Registered care activities per age and gender for the years 2012-2015. This data is in multiple different files: 
+    a.	hospital admissions (inpatient and outpatient) per age and gender
+    b.	surgeries (inpatient and outpatient) per age and gender
+    c.	all activities categorized in 11 categories, not per age and gender. Here fore we will make the assumption that the distribution is equal to that of admissions
+2.	Number of square meters needed per building element and single care activity in a year
+3.	Forecast of demography of the population (age and gender) for the years 2015-2040.
+
+##Gathering and cleaning
+We read our data files. [... more explanation on which data sets exactly?....]
+
+```{r, read_data, echo=FALSE}
+
+# population forecast
+Pop <- read.csv("Data/CBS_population forecast per region, gender and age - 2014-2040.csv")
+print(head(Pop,5))
+
+# m2 required per activity
+BuildReq <- read.csv("Data/Bouwcollege - m2 per activity.csv", header = TRUE, sep=",")
+print(head(BuildReq,5))
+
+# number of surgeries performed (inpatient and outpatient) per gender and age in 1995-2010
+Surgeries <- read.csv("Data/CBS - surgery outpatient and inpatient per gender and age - 1995 - 2010_v2.csv",
+header=TRUE, sep=",",dec=".",stringsAsFactors = FALSE, na=0)
+ 
+#cols=c("Total_surgeries","Total_surgeries_per_10000_inhabitants","Inpatient_surgeries","Inpatient_surgeries_per_10000_inhabitants","Outpatient_surgeries","Outpatient_surgeries_per_10000_inhabitants")
+ 
+ 
+# i=0
+# name=0
+# for (i in 1:length(cols))
+# {
+#   name=cols[i]
+#   Surgeries$name[Surgeries$name=="."]<-0
+# #Surgeries$cols[i][Surgeries$col[i]=="."]<-0
+# }
+ 
+Surgeries$Total_surgeries[Surgeries$Total_surgeries=="."]<-0
+Surgeries$Total_surgeries_per_10000_inhabitants[Surgeries$Total_surgeries_per_10000_inhabitants=="."]<-0
+Surgeries$Inpatient_surgeries[Surgeries$Inpatient_surgeries=="."]<-0
+Surgeries$Inpatient_surgeries_per_10000_inhabitants[Surgeries$Inpatient_surgeries_per_10000_inhabitants=="."]<-0
+Surgeries$Outpatient_surgeries[Surgeries$Outpatient_surgeries=="."]<-0
+Surgeries$Outpatient_surgeries_per_10000_inhabitants[Surgeries$Outpatient_surgeries_per_10000_inhabitants=="."]<-0
+
+print(head(Surgeries,5))
+
+                 
+
+# number of hospital admissions (inpatient and outpatient) per gender and age in 1981-2012
+Admissions <- read.csv("Data/CBS - hospital admissions per gender and age 1981-2012_v2.csv", header=TRUE, sep=",")
+print(head(Admissions,5))
+
+# number of detailed activities per specialisation, DOT
+Act2014 <- read.csv("Data/02_DBC_PROFIEL_2014.csv", header=TRUE, sep=",")
+print(head(Act2014,5))
+
+# reference tables to interpret the activities, DOT's and specialisations
+Ref_Act <- read.csv("Data/03_REF_ZAT.csv", header=TRUE, sep=",")
+print(head(Ref_Act,5))
+Ref_diag <- read.csv("Data/04_REF_DGN.csv", header=TRUE, sep=",")
+print(head(Ref_diag,5))
+Ref_prod <- read.csv("Data/05_REF_ZPD.csv", header=TRUE, sep=",")
+print(head(Ref_prod,5))
+Ref_Spec <- read.csv("Data/06_REF_SPC.csv", header=TRUE, sep=",")
+print(head(Ref_Spec,5))
+
+Age_gender_ID <- read.csv("Data/Age_gender_ID.csv", header=TRUE, sep=",")
+print(head(Age_gender_ID,5))
+```
+
+
+##Sanity checks
+[...add table with some numbers to check...]
+```{r, sanity_check, echo=FALSE}
+#we make a table that summarizes the total number of operations and compare them to what they should be roughly
+#we'll cheat by using the final table to the sanity check at the end
+
+#summary_table <- data.frame(x= numeric(0), y= integer(0), z = character(0))
+#summary_table$Type_act<- c("Consultation","Imaging diagnostics","Inpatient_surg","Outpatient_surg","Nursing_days","Outpatient_admissions")
+
+```
+
+##Summary and visualisation
+To show how the demography of the population changes, we visualize the composition of the population in 2014 and 2040.
+
+```{r, visualize_pop, echo=FALSE}
+library(pyramid)
+
+pop_graph <- subset(Pop, (Age=="0 tot 5 jaar" |  Age=="5 tot 10 jaar"|  Age=="10 tot 15 jaar"|  Age=="15 tot 20 jaar"|  Age=="20 tot 25 jaar"|  Age=="25 tot 30 jaar"|  Age=="30 tot 35 jaar"|  Age=="35 tot 40 jaar"|  Age=="40 tot 45 jaar"|  Age=="45 tot 50 jaar"|  Age=="50 tot 55 jaar"|  Age=="55 tot 60 jaar"|  Age=="60 tot 65 jaar"|  Age=="65 tot 70 jaar"|  Age=="70 tot 75 jaar"|  Age=="75 tot 80 jaar"|  Age=="80 tot 85 jaar"|  Age=="85 tot 90 jaar"|  Age=="90 tot 95 jaar"|  Age=="95 jaar of ouder"),select=c(Age, Population_x1000, Type.of.region, Gender, Year), drop = TRUE)
+
+
+pop_graph_men_2014 <- subset(pop_graph, (Type.of.region=="Country" & Year == "2014" & Gender=="Mannen"),select=c(Population_x1000,Age), drop = TRUE)
+
+pop_graph_women_2014 <- subset(pop_graph, (Type.of.region=="Country" & Year == "2014" & Gender=="Vrouwen"),select=c(Population_x1000, Age), drop = TRUE)
+
+pop_graph_men_2040 <- subset(pop_graph, (Type.of.region=="Country" & Year == "2040" & Gender=="Mannen"),select=c(Population_x1000,Age), drop = TRUE)
+
+pop_graph_women_2040 <- subset(pop_graph, (Type.of.region=="Country" & Year == "2040" & Gender=="Vrouwen"),select=c(Population_x1000,Age), drop = TRUE)
+
+Pop_graph_2014<- merge(pop_graph_men_2014, pop_graph_women_2014, by= "Age")
+Pop_graph_2014_ordered <- Pop_graph_2014[,c(2,3,1)]
+
+pyramid(Pop_graph_2014_ordered, Laxis=NULL, Raxis=NULL,
+AxisFM="g", AxisBM="", AxisBI=3, Cgap=0.6, Cstep=0.5, Csize=1,
+Llab="Males", Rlab="Females", Clab="Ages", GL=TRUE, Cadj=-0.03,
+Lcol="Cyan", Rcol="Pink", Ldens=-1, Rdens=-1, main="Population 2014")
+
+Pop_graph_2040<- merge(pop_graph_men_2040, pop_graph_women_2040, by= "Age")
+Pop_graph_2040_ordered <- Pop_graph_2040[,c(2,3,1)]
+
+pyramid(Pop_graph_2040_ordered, Laxis=NULL, Raxis=NULL,
+AxisFM="g", AxisBM="", AxisBI=3, Cgap=0.6, Cstep=0.5, Csize=1,
+Llab="Males", Rlab="Females", Clab="Ages", GL=TRUE, Cadj=-0.03,
+Lcol="Cyan", Rcol="Pink", Ldens=-1, Rdens=-1, main="Population 2040")
+
+```
+
+#**Part 4.** Calculations
+##Preparation of data
+As visualized above, the raw data that we are getting from the various sources are not homogeneous. we need to organize and combine them in order to be able to use them together and draw the projections up to 2040.
+
+```{r,add_ID_age_gender,echo=FALSE}
+
+# add Index numbers to population table and sum total within ID category
+Pop_index_temp <- subset(merge(Pop, Age_gender_ID, by.x=c("Age", "Gender"), by.y=c("Forecast_age", "Gender")),select=c("Age_gender_ID","Year", "Region", "Type.of.region","Population_x1000"))
+
+Pop_index <- aggregate(Population_x1000 ~ .,Pop_index_temp, sum)
+
+```
+
+```{r, SurgeriesTable, echo=FALSE}
+# select all rows for which the column surgeries says 'all', year=2010
+# select columns containing 1 age, 2 gender, 3 number of inpatient surgeries and 4 number of outpatient surgeries
+Surgeries_2 <- subset(Surgeries, (Surgery=="All"& Year=="2010"), select=c(Gender,Age,Inpatient_surgeries,Outpatient_surgeries),drop=TRUE)
+
+# add age_gender_ID
+Surgeries_3 <- unique(subset(merge(Surgeries_2, Age_gender_ID, by.x=c("Age", "Gender"), by.y=c("Surg_Age", "Gender")),select=c("Age_gender_ID","Age","Gender","Inpatient_surgeries","Outpatient_surgeries")))
+
+# restructure table such that it contains a column for type of activity, instead of each column being a different activity
+Surgeries_inp <- Surgeries_3[,c("Age_gender_ID","Age", "Gender", "Inpatient_surgeries")]
+colnames(Surgeries_inp) <- c("Age_gender_ID","Age", "Gender", "Number_of_act") # rename column
+Surgeries_inp$Type_act="Inpatient_surg" # add column
+
+Surgeries_outp <- Surgeries_3[,c("Age_gender_ID","Age", "Gender", "Outpatient_surgeries")]
+colnames(Surgeries_outp) <- c("Age_gender_ID","Age", "Gender", "Number_of_act") # rename column
+Surgeries_outp$Type_act="Outpatient_surg" # add column
+
+Surgeries_4 <- rbind(Surgeries_inp,Surgeries_outp)
+
+# add total number of inhabitants per Age_gender_ID
+
+# merge surgeries with a subset of Popindex that contains the data for 2014 and NL
+# note: shortcut of using 2014 population against 2010 numbers, because 2010 is not in the table
+Surgeries_def <- merge(Surgeries_4,subset(Pop_index, (Type.of.region=="Country"& Year=="2014"), select=c(Age_gender_ID,Population_x1000),drop=TRUE), by="Age_gender_ID")
+
+Surgeries_def$Act_per_1000inhab <- as.numeric(Surgeries_def$Number_of_act) / as.numeric(Surgeries_def$Population_x1000)
+
+# add square meter requirement
+Surgeries_def$Space_per_act = BuildReq[which(BuildReq$Englisch.name.activity.cluster == "Surgeries"),"Total.normative.space"]
+
+head(Surgeries_def,5)
+```
+
+=======
+```{r, AdmissionsTable, echo=FALSE}
+# select all rows for which the column year=2012
+# select columns containing 1 age, 2 gender, 3 number of outpatient admissions per 10000 inhabitants,  4 number of nursing days per 10000
+Admissions_2 <- subset(Admissions, Year=="2012*", select=c(Gender,Age,Outpatient_admissions_per_10000_inhabitants, Nursingdays_per_10000_inhabitants, Average_poulation),drop=TRUE)
+
+# add age_gender_ID
+Admissions_3 <- unique(subset(merge(Admissions_2, Age_gender_ID, by.x=c("Age", "Gender"), by.y=c("Adm_age", "Gender")),select=c("Age_gender_ID","Surg_Age","Gender","Outpatient_admissions_per_10000_inhabitants", "Nursingdays_per_10000_inhabitants", "Average_poulation")))
+colnames(Admissions_3)<-c("Age_gender_ID","Age","Gender","Outpatient_admissions_per_10000_inhabitants", "Nursingdays_per_10000_inhabitants", "Average_poulation")
+
+# restructure table such that it contains a column for type of activity, instead of each column being a different activity
+Adm_inp <- Admissions_3[,c("Age_gender_ID","Age", "Gender", "Nursingdays_per_10000_inhabitants", "Average_poulation")]
+
+# weighted average to find nursing days in a category, because we want to use bigger categories later
+Adm_inp$Number_of_act = Adm_inp$Nursingdays_per_10000_inhabitants * Adm_inp$Average_poulation/10000
+Adm_inp2 <- Adm_inp[,c("Age_gender_ID","Age", "Gender","Number_of_act")]
+Adm_inp3 <- aggregate(Number_of_act ~ .,Adm_inp2, sum)                                  
+                                  
+Adm_inp3$Type_act="Nursing_days" # add column
+Adm_inp3$Space_per_act = BuildReq[which(BuildReq$Englisch.name.activity.cluster == "Nursing days"),"Total.normative.space"]
+
+Adm_outp <- Admissions_3[,c("Age_gender_ID","Age", "Gender", "Outpatient_admissions_per_10000_inhabitants", "Average_poulation")]
+
+Adm_outp$Number_of_act = (as.integer(Adm_outp$Outpatient_admissions_per_10000_inhabitants) * Adm_outp$Average_poulation)/10000
+Adm_outp2 <- Adm_outp[,c("Age_gender_ID","Age", "Gender","Number_of_act")]
+Adm_outp3 <- aggregate(Number_of_act ~ .,Adm_outp2, sum)  
+
+Adm_outp3$Type_act="Outpatient_admissions" # add column
+Adm_outp3$Space_per_act = BuildReq[which(BuildReq$Englisch.name.activity.cluster == "Day admissions"),"Total.normative.space"]
+
+Admissions_4 <- rbind(Adm_inp3,Adm_outp3)
+
+# add total number of inhabitants per Age_gender_ID
+
+# merge surgeries with a subset of Popindex that contains the data for 2014 and NL
+# note: shortcut of using 2014 population against 2010 numbers, because 2010 is not in the table
+Admissions_def <- merge(Admissions_4,subset(Pop_index, (Type.of.region=="Country"& Year=="2014"), select=c(Age_gender_ID,Population_x1000),drop=TRUE), by="Age_gender_ID")
+
+Admissions_def$Act_per_1000inhab <- as.numeric(Admissions_def$Number_of_act) / as.numeric(Admissions_def$Population_x1000)
+
+Admissions_def <- Admissions_def[,c("Age_gender_ID","Age","Gender","Number_of_act","Type_act","Population_x1000","Act_per_1000inhab","Space_per_act")]
+
+head(Admissions_def,5)
+```
+
+```{r} 
+Consultation_imaging_ref <- subset(Surgeries_outp, select=c("Age_gender_ID","Age","Gender","Number_of_act"), drop=TRUE)
+
+Consultation_imaging_ref$Ratio_per_agegroup= as.integer(Surgeries_outp$Number_of_act)/sum(as.integer(Surgeries_outp$Number_of_act))  # add column with ratio per age-group
+
+Consultation_imaging_ref $Type_Act_con="Consultation" # add column for type of activity (consultations)
+
+Consultation_1 <- subset(Act2014, (ZORGPROFIELKLASSE_CD=="1" & JAAR=="2014"), select=c("JAAR","AANTAL_ZAT"), drop=TRUE) # Get total number of activities for this category (consultations)
+
+Consultation_imaging_ref$Activities_con=round( (Consultation_imaging_ref$Ratio_per_agegroup)*sum(Consultation_1[,2]),0) # Create proxy for number of activities per agegroup and gender based on Outpatient ratio 
+
+Consultation_imaging_ref$Type_Act_img="Imaging diagnostics" #  add column for type of activity (Imaging)
+
+Imaging_1 <- subset(Act2014, (ZORGPROFIELKLASSE_CD=="7" & JAAR=="2014"), select=c("JAAR","AANTAL_ZAT"), drop=TRUE) # Get total number of activities for this category (Imaging)
+
+Consultation_imaging_ref$Activities_img=round( (Consultation_imaging_ref$Ratio_per_agegroup)*sum(Imaging_1[,2]),0) # Create proxy for number of activities per agegroup and gender based on Outpatient ratio
+
+Consultation_2 <- subset(Consultation_imaging_ref, select=c("Age_gender_ID","Age","Gender","Activities_con","Type_Act_con"), drop=TRUE) # Prepare data for output table to be used in calculations
+
+colnames(Consultation_2) <- c("Age_gender_ID","Age", "Gender", "Number_of_act","Type_act") # rename column # rename columns in order to match with other type of activities
+
+Imaging_2 <- subset(Consultation_imaging_ref, select=c("Age_gender_ID","Age","Gender","Activities_img","Type_Act_img"), drop=TRUE)
+
+colnames(Imaging_2) <- c("Age_gender_ID","Age", "Gender", "Number_of_act","Type_act") # rename column # rename columns in order to match with other type of activities
+
+Consultation_def <- merge(Consultation_2,subset(Pop_index, (Type.of.region=="Country"& Year=="2014"), select=c(Age_gender_ID,Population_x1000),drop=TRUE), by="Age_gender_ID") # add population numbers
+
+Consultation_def$Act_per_1000inhab <- as.numeric(Consultation_def$Number_of_act) / as.numeric(Consultation_def$Population_x1000) # calculate activities per 1000 inhabitants
+
+Consultation_def$Space_per_act = BuildReq[which(BuildReq$Englisch.name.activity.cluster == "Outpatient visits"),"Total.normative.space"] # add square meter requirement
+
+Imaging_def <- merge(Imaging_2,subset(Pop_index, (Type.of.region=="Country"& Year=="2014"), select=c(Age_gender_ID,Population_x1000),drop=TRUE), by="Age_gender_ID") # add population numbers
+
+Imaging_def$Act_per_1000inhab <- as.numeric(Imaging_def$Number_of_act) / as.numeric(Imaging_def$Population_x1000) # calculate activities per 1000 inhabitants
+
+Imaging_def$Space_per_act = BuildReq[which(BuildReq$Englisch.name.activity.cluster == "Imaging diagnostics"),"Total.normative.space"] # add square meter requirement
+
+head(Consultation_def,5)
+head(Imaging_def,5)
+
+```
+
+```{r}
+library(plyr)
+
+Total_activities_2014 <- rbind.fill(Consultation_def, Imaging_def, Surgeries_def, Admissions_def)
+
+```
+
+=====
+
+##Assumptions
+[...write about the assumptions that we have to make..]
+
+##Implementation
+[describe what happens...
+a.	Count number of activities in 6 categories (outpatient admissions, inpatient nursing days, outpatient surgeries, inpatient surgeries, outpatient visits, imaging diagnostics) per region, age and gender
+
+b.	Multiply number of activities with the corresponding space requirement in m2 to get required m2 per type of space, region in Netherlands, gender and age
+
+c.	Multiply with demography developments to get required m2 per type of space, region in Netherlands, gender and age for the years 2018-2040.
+
+...]
+
+
+
+```{r, Projection, eval=TRUE}
+cproj=c("Year", "Region", "Activity")
+#Generating the global table with projection of space from 2014 to 2040
+Projection <- merge(subset(Pop_index, select=c(Age_gender_ID,Year,Region,Population_x1000 ),drop=TRUE), subset(Total_activities_2014, select=c(Age_gender_ID,Age,Gender,Type_act, Act_per_1000inhab, Space_per_act),drop=TRUE), by="Age_gender_ID")
+ 
+Projection$Total_space=round((Projection$Population_x1000)*(Projection$Act_per_1000inhab)* (Projection$Space_per_act),0) # Calculate total space needed for every activity in every agegroup for both gender 
+
+#subset per year, age group, gender, region and activity
+Projection<- subset(Projection,select = c(Age,Gender,Year,Region,Type_act, Total_space))
+colnames(Projection)[colnames(Projection) == 'Type_act'] <- 'Activity' 
+head(Projection,5)
+```
+
+Now that we have the detailed projections, we want sum the required surfaces on the Age and Gender to obtain statistics pe Region and Activity
+```{r, result, eval=TRUE}
+library("plyr")
+
+
+Result <-aggregate(Total_space ~ Year+Region+Activity,Projection,sum)
+ 
+print(head(Result, 10))
+```
+
+##5.	Assumptions and matching
+
+
+
+##6.	Calculations:
+=======
+
+
+#**Part 5.** Results
+[...table and visualisation of results...]
+[...some textual explanation of it...]
+
+```{r} 
+library(ggplot2)
+test<- matrix(c(2014,2015,2016,2014,2015,2016,"Diagnostics","Diagnostics","Diagnostics","Surgeries","Surgeries","Surgeries",10,12,19,11,13,17),nrow=6, ncol=3)
+colnames(test)<-c("Year", "Group", "Activity")
+test_graph <- data.frame(test)
+ggplot(test_graph, aes(x=Year,y=Activity,group=Group,fill=Group)) + geom_area() + geom_line(position='stack')
+```
+
+
+#**Part 6.** Usage of process and results
+
+##Limitations
+There are a number of limitations to the described process for aplication in real-life business problems, mainly caused by availibility of data:
+
+1.  We don’t know the current capacity, its usage or its life expectancy. So we cannot match the required space to the actual space to determine how much extra should be build for the future.
+2.  We assume no impact of innovation of care. However, in practice we have seen that nursing days per admission has steadily decreased. The model could be refined to include assumptions on this.
+3.  We have no data on specific zip-codes. Including makes it possible to forecast the space requirement for a specific hospital based on its care region.
+
+##Usage in different context
+We can use the same process for different data sets and purposes:
+
+1.  Different time horizons
+2.  Different countries 
+3.  Refining for specific parts of the country, for example the care region of a hospital
+4.  Refining for specializations
+5.  Different types of care, such as youth care. Activities are different and space requirements as well, but the process is the same
+6.  Alternative ‘weighting’ of activities. By using m2 to weight the 6 different types of care, we get a physical result, but we could also weight the activities with average cost to forecast future health expenditure.
