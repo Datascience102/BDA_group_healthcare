@@ -335,7 +335,7 @@ head(Projection,5)
 ```
 
 Now that we have the detailed projections, we want sum the required surfaces on the Age and Gender to obtain statistics pe Region and Activity
-```{r, Projection, eval=TRUE}
+```{r, result, eval=TRUE}
 library("plyr")
 
 
