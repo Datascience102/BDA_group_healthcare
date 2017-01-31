@@ -91,6 +91,21 @@ Surgeries$Inpatient_surgeries_per_10000_inhabitants[Surgeries$Inpatient_surgerie
 Surgeries$Outpatient_surgeries[Surgeries$Outpatient_surgeries=="."]<-0
 Surgeries$Outpatient_surgeries_per_10000_inhabitants[Surgeries$Outpatient_surgeries_per_10000_inhabitants=="."]<-0
 
+Surgeries$Total_surgeries<-as.numeric(Surgeries$Total_surgeries)
+Surgeries$Total_surgeries_per_10000_inhabitants<-as.numeric(Surgeries$Total_surgeries_per_10000_inhabitants)
+Surgeries$Inpatient_surgeries<-as.numeric(Surgeries$Inpatient_surgeries)
+Surgeries$Inpatient_surgeries_per_10000_inhabitants<-as.numeric(Surgeries$Inpatient_surgeries_per_10000_inhabitants)
+Surgeries$Outpatient_surgeries<-as.numeric(Surgeries$Outpatient_surgeries)
+Surgeries$Outpatient_surgeries_per_10000_inhabitants<-as.numeric(Surgeries$Outpatient_surgeries_per_10000_inhabitants)
+
+Surgeries$Total_surgeries[is.na(Surgeries$Total_surgeries)]<-0
+Surgeries$Total_surgeries_per_10000_inhabitants[is.na(Surgeries$Total_surgeries_per_10000_inhabitants)]<-0
+Surgeries$Inpatient_surgeries[is.na(Surgeries$Inpatient_surgeries)]<-0
+Surgeries$Inpatient_surgeries_per_10000_inhabitants[is.na(Surgeries$Inpatient_surgeries_per_10000_inhabitants)]<-0
+Surgeries$Outpatient_surgeries[is.na(Surgeries$Outpatient_surgeries)]<-0
+Surgeries$Outpatient_surgeries_per_10000_inhabitants[is.na(Surgeries$Outpatient_surgeries_per_10000_inhabitants)]<-0
+
+
 print(head(Surgeries,5))
 
                  
@@ -98,6 +113,29 @@ print(head(Surgeries,5))
 # number of hospital admissions (inpatient and outpatient) per gender and age in 1981-2012
 Admissions <- read.csv("Data/CBS - hospital admissions per gender and age 1981-2012_v2.csv", header=TRUE, sep=",")
 print(head(Admissions,5))
+
+Admissions$Total_admissions_per_10000_inhabitants[Admissions$Total_admissions_per_10000_inhabitants=="."]<-0
+Admissions$Outpatient_admissions_per_10000_inhabitants[Admissions$Outpatient_admissions_per_10000_inhabitants=="."]<-0
+Admissions$Inpatient_admissions_per_10000_inhabitants[Admissions$Inpatient_admissions_per_10000_inhabitants=="."]<-0
+Admissions$Average_nursing_days_per_inpatient_admission[Admissions$Average_nursing_days_per_inpatient_admission=="."]<-0
+Admissions$Average_poulation[Admissions$Average_poulation=="."]<-0
+
+
+Admissions$Total_admissions_per_10000_inhabitants<-as.numeric(Admissions$Total_admissions_per_10000_inhabitants)
+Admissions$Outpatient_admissions_per_10000_inhabitants<-as.numeric(Admissions$Outpatient_admissions_per_10000_inhabitants)
+Admissions$Inpatient_admissions_per_10000_inhabitants<-as.numeric(Admissions$Inpatient_admissions_per_10000_inhabitants)
+Admissions$Nursingdays_per_10000_inhabitants<-as.numeric(Admissions$Nursingdays_per_10000_inhabitants)
+Admissions$Average_nursing_days_per_inpatient_admission<-as.numeric(Admissions$Average_nursing_days_per_inpatient_admission)
+Admissions$Average_poulation<-as.numeric(Admissions$Average_poulation)
+
+
+Admissions$Total_admissions_per_10000_inhabitants[is.na(Admissions$Total_admissions_per_10000_inhabitants)]<-0
+Admissions$Outpatient_admissions_per_10000_inhabitants[is.na(Admissions$Outpatient_admissions_per_10000_inhabitants)]<-0
+Admissions$Inpatient_admissions_per_10000_inhabitants[is.na(Admissions$Inpatient_admissions_per_10000_inhabitants)]<-0
+Admissions$Nursingdays_per_10000_inhabitants[is.na(Admissions$Nursingdays_per_10000_inhabitants)]<-0
+Admissions$Average_nursing_days_per_inpatient_admission[is.na(Admissions$Average_nursing_days_per_inpatient_admission)]<-0
+Admissions$Average_poulation[is.na(Admissions$Average_poulation)]<-0
+
 
 # number of detailed activities per specialisation, DOT
 Act2014 <- read.csv("Data/02_DBC_PROFIEL_2014.csv", header=TRUE, sep=",")
@@ -124,9 +162,48 @@ print(head(Age_gender_ID,5))
 #we make a table that summarizes the total number of operations and compare them to what they should be roughly
 #we'll cheat by using the final table to the sanity check at the end
 
-#summary_table <- data.frame(x= numeric(0), y= integer(0), z = character(0))
-#summary_table$Type_act<- c("Consultation","Imaging diagnostics","Inpatient_surg","Outpatient_surg","Nursing_days","Outpatient_admissions")
+summary_table <- data.frame(Type_act= character(6), Number_act_source1=numeric(6), Number_act_source2=numeric(6), Check_value = integer(6))
+summary_table$Type_act<- c("Consultation","Imaging diagnostics","Inpatient_surg","Outpatient_surg","Nursing_days","Outpatient_admissions")
 
+# number of activities from OpenDis data write to colum of source 1
+# where Zorgprofielklasse_cd 1 = consultation
+#       Zorgprofielklasse_cd 2 = Outpatient_admissions
+#       Zorgprofielklasse_cd 3 = Nursing days
+#       Zorgprofielklasse_cd 4 = Imaging diagnostics
+#       Zorgprofielklasse_cd 5 = Inpatient + outpatient surgeries (40%, 60%)
+
+summary_table[which(summary_table$Type_act == "Consultation"),"Number_act_source1"] <- 
+  sum(subset(Act2014, (ZORGPROFIELKLASSE_CD=="1" & JAAR=="2014"), select="AANTAL_ZAT", drop=TRUE))
+
+summary_table[which(summary_table$Type_act == "Outpatient_admissions"),"Number_act_source1"] <- 
+  sum(subset(Act2014, (ZORGPROFIELKLASSE_CD=="2" & JAAR=="2014"), select="AANTAL_ZAT", drop=TRUE))
+
+summary_table[which(summary_table$Type_act == "Nursing_days"),"Number_act_source1"] <- 
+  sum(subset(Act2014, (ZORGPROFIELKLASSE_CD=="3" & JAAR=="2014"), select="AANTAL_ZAT", drop=TRUE))
+
+summary_table[which(summary_table$Type_act == "Imaging diagnostics"),"Number_act_source1"] <- 
+  sum(subset(Act2014, (ZORGPROFIELKLASSE_CD=="4" & JAAR=="2014"), select="AANTAL_ZAT", drop=TRUE))
+
+
+summary_table[which(summary_table$Type_act == "Inpatient_surg"),"Number_act_source1"] <- 0.4 * 
+  sum(subset(Act2014, (ZORGPROFIELKLASSE_CD=="5" & JAAR=="2014"), select="AANTAL_ZAT", drop=TRUE))
+
+summary_table[which(summary_table$Type_act == "Outpatient_surg"),"Number_act_source1"] <- 0.6 * 
+  sum(subset(Act2014, (ZORGPROFIELKLASSE_CD=="5" & JAAR=="2014"), select="AANTAL_ZAT", drop=TRUE))
+
+#number of surgeries (inpatient and outpatient), outpatient admissions and nursing days from more detailed CBS source
+
+summary_table[which(summary_table$Type_act == "Inpatient_surg"),"Number_act_source2"] <- sum(subset(Surgeries, Year == "2010", select="Inpatient_surgeries"))
+
+summary_table[which(summary_table$Type_act == "Outpatient_surg"),"Number_act_source2"] <- sum(subset(Surgeries, Year == "2010", select="Outpatient_surgeries"))
+
+Admissions$Outpatient_admissions_total <- Admissions$Outpatient_admissions_per_10000_inhabitants*Admissions$Average_poulation/10000
+
+Admissions$Nursingdays_total<-Admissions$Nursingdays_per_10000_inhabitants*Admissions$Average_poulation/10000
+
+summary_table[which(summary_table$Type_act == "Outpatient_admissions"),"Number_act_source2"] <- sum(subset(Admissions, Year == "2010", select="Outpatient_admissions_total"))
+
+summary_table[which(summary_table$Type_act == "Nursing_days"),"Number_act_source2"] <- sum(subset(Admissions, Year == "2010", select="Nursingdays_total"))
 ```
 
 ##Summary and visualisation
