@@ -102,22 +102,47 @@ header=TRUE, sep=",",dec=".",stringsAsFactors = FALSE, na=0)
 # #Surgeries$cols[i][Surgeries$col[i]=="."]<-0
 # }
  
-Surgeries$Total_surgeries[Surgeries$Total_surgeries=="."]<-0
-Surgeries$Total_surgeries_per_10000_inhabitants[Surgeries$Total_surgeries_per_10000_inhabitants=="."]<-0
-Surgeries$Inpatient_surgeries[Surgeries$Inpatient_surgeries=="."]<-0
-Surgeries$Inpatient_surgeries_per_10000_inhabitants[Surgeries$Inpatient_surgeries_per_10000_inhabitants=="."]<-0
-Surgeries$Outpatient_surgeries[Surgeries$Outpatient_surgeries=="."]<-0
-Surgeries$Outpatient_surgeries_per_10000_inhabitants[Surgeries$Outpatient_surgeries_per_10000_inhabitants=="."]<-0
 
 visu(Surgeries,5)
 
-                 
+Surgeries$Total_surgeries<-as.numeric(as.character(Surgeries$Total_surgeries))
+Surgeries$Total_surgeries_per_10000_inhabitants<-as.numeric(as.character(Surgeries$Total_surgeries_per_10000_inhabitants))
+Surgeries$Inpatient_surgeries<-as.numeric(as.character(Surgeries$Inpatient_surgeries))
+Surgeries$Inpatient_surgeries_per_10000_inhabitants<-as.numeric(as.character(Surgeries$Inpatient_surgeries_per_10000_inhabitants))
+Surgeries$Outpatient_surgeries<-as.numeric(as.character(Surgeries$Outpatient_surgeries))
+Surgeries$Outpatient_surgeries_per_10000_inhabitants<-as.numeric(as.character(Surgeries$Outpatient_surgeries_per_10000_inhabitants))
+
+Surgeries$Total_surgeries[is.na(Surgeries$Total_surgeries)]<-0
+Surgeries$Total_surgeries_per_10000_inhabitants[is.na(Surgeries$Total_surgeries_per_10000_inhabitants)]<-0
+Surgeries$Inpatient_surgeries[is.na(Surgeries$Inpatient_surgeries)]<-0
+Surgeries$Inpatient_surgeries_per_10000_inhabitants[is.na(Surgeries$Inpatient_surgeries_per_10000_inhabitants)]<-0
+Surgeries$Outpatient_surgeries[is.na(Surgeries$Outpatient_surgeries)]<-0
+Surgeries$Outpatient_surgeries_per_10000_inhabitants[is.na(Surgeries$Outpatient_surgeries_per_10000_inhabitants)]<-0
+               
 ```
 
 The next dataset indexes some information on hospital admissions per gender and age from 1981 and 2012
 ```{r, echo=FALSE}
 # number of hospital admissions (inpatient and outpatient) per gender and age in 1981-2012
 Admissions <- read.csv("Data/CBS - hospital admissions per gender and age 1981-2012_v2.csv", header=TRUE, sep=",")
+
+
+
+Admissions$Total_admissions_per_10000_inhabitants<-as.numeric(as.character(Admissions$Total_admissions_per_10000_inhabitants))
+Admissions$Outpatient_admissions_per_10000_inhabitants<-as.numeric(as.character(Admissions$Outpatient_admissions_per_10000_inhabitants))
+Admissions$Inpatient_admissions_per_10000_inhabitants<-as.numeric(as.character(Admissions$Inpatient_admissions_per_10000_inhabitants))
+Admissions$Nursingdays_per_10000_inhabitants<-as.numeric(as.character(Admissions$Nursingdays_per_10000_inhabitants))
+Admissions$Average_nursing_days_per_inpatient_admission<-as.numeric(as.character(Admissions$Average_nursing_days_per_inpatient_admission))
+Admissions$Average_poulation<-as.numeric(as.character(Admissions$Average_poulation))
+
+
+Admissions$Total_admissions_per_10000_inhabitants[is.na(Admissions$Total_admissions_per_10000_inhabitants)]<-0
+Admissions$Outpatient_admissions_per_10000_inhabitants[is.na(Admissions$Outpatient_admissions_per_10000_inhabitants)]<-0
+Admissions$Inpatient_admissions_per_10000_inhabitants[is.na(Admissions$Inpatient_admissions_per_10000_inhabitants)]<-0
+Admissions$Nursingdays_per_10000_inhabitants[is.na(Admissions$Nursingdays_per_10000_inhabitants)]<-0
+Admissions$Average_nursing_days_per_inpatient_admission[is.na(Admissions$Average_nursing_days_per_inpatient_admission)]<-0
+Admissions$Average_poulation[is.na(Admissions$Average_poulation)]<-0
+
 
 visu(Admissions,5)
 ```
@@ -154,14 +179,69 @@ visu(Age_gender_ID,5)
 
 
 ##Sanity checks
-[...add table with some numbers to check...]
+In the graphs below we show how
 ```{r, sanity_check, echo=FALSE}
 #we make a table that summarizes the total number of operations and compare them to what they should be roughly
 #we'll cheat by using the final table to the sanity check at the end
 
-#summary_table <- data.frame(x= numeric(0), y= integer(0), z = character(0))
-#summary_table$Type_act<- c("Consultation","Imaging diagnostics","Inpatient_surg","Outpatient_surg","Nursing_days","Outpatient_admissions")
+summary_table <- data.frame(Type_act= character(6), Number_act_source1=numeric(6), Number_act_source2=numeric(6), Check_value = integer(6))
+summary_table$Type_act<- c("Consultation","Imaging diagnostics","Inpatient_surg","Outpatient_surg","Nursing_days","Outpatient_admissions")
 
+# number of activities from OpenDis data write to colum of source 1
+# where Zorgprofielklasse_cd 1 = consultation
+#       Zorgprofielklasse_cd 2 = Outpatient_admissions
+#       Zorgprofielklasse_cd 3 = Nursing days
+#       Zorgprofielklasse_cd 4 = Imaging diagnostics
+#       Zorgprofielklasse_cd 5 = Inpatient + outpatient surgeries (40%, 60%)
+
+summary_table[which(summary_table$Type_act == "Consultation"),"Number_act_source1"] <- 
+  sum(subset(Act2014, (ZORGPROFIELKLASSE_CD=="1" & JAAR=="2014"), select="AANTAL_ZAT", drop=TRUE))
+
+summary_table[which(summary_table$Type_act == "Outpatient_admissions"),"Number_act_source1"] <- 
+  sum(subset(Act2014, (ZORGPROFIELKLASSE_CD=="2" & JAAR=="2014"), select="AANTAL_ZAT", drop=TRUE))
+
+summary_table[which(summary_table$Type_act == "Nursing_days"),"Number_act_source1"] <- 
+  sum(subset(Act2014, (ZORGPROFIELKLASSE_CD=="3" & JAAR=="2014"), select="AANTAL_ZAT", drop=TRUE))
+
+summary_table[which(summary_table$Type_act == "Imaging diagnostics"),"Number_act_source1"] <- 
+  sum(subset(Act2014, (ZORGPROFIELKLASSE_CD=="4" & JAAR=="2014"), select="AANTAL_ZAT", drop=TRUE))
+
+
+summary_table[which(summary_table$Type_act == "Inpatient_surg"),"Number_act_source1"] <- 0.5 * 
+  sum(subset(Act2014, (ZORGPROFIELKLASSE_CD=="5" & JAAR=="2014"), select="AANTAL_ZAT", drop=TRUE))
+
+summary_table[which(summary_table$Type_act == "Outpatient_surg"),"Number_act_source1"] <- 0.5 * 
+  sum(subset(Act2014, (ZORGPROFIELKLASSE_CD=="5" & JAAR=="2014"), select="AANTAL_ZAT", drop=TRUE))
+
+#number of surgeries (inpatient and outpatient), outpatient admissions and nursing days from more detailed CBS source
+
+summary_table[which(summary_table$Type_act == "Inpatient_surg"),"Number_act_source2"] <- sum(subset(Surgeries, Year == "2010", select="Inpatient_surgeries"))
+
+summary_table[which(summary_table$Type_act == "Outpatient_surg"),"Number_act_source2"] <- sum(subset(Surgeries, Year == "2010", select="Outpatient_surgeries"))
+
+Admissions$Outpatient_admissions_total <- Admissions$Outpatient_admissions_per_10000_inhabitants*Admissions$Average_poulation/10000
+
+Admissions$Nursingdays_total<-Admissions$Nursingdays_per_10000_inhabitants*Admissions$Average_poulation/10000
+
+summary_table[which(summary_table$Type_act == "Outpatient_admissions"),"Number_act_source2"] <- sum(subset(Admissions, Year == "2012*", select="Outpatient_admissions_total"))
+
+summary_table[which(summary_table$Type_act == "Nursing_days"),"Number_act_source2"] <- sum(subset(Admissions, Year == "2012*", select="Nursingdays_total"))
+
+summary_table[,"Check_value"]<-c(29400000,12000000,1100000,1400000,9200000,1800000)
+
+#calculate the difference between expected and true value
+summary_table$deviation_sc1 <-  abs((summary_table$Number_act_source1-summary_table$Check_value)/summary_table$Check_value)
+summary_table$deviation_sc2 <- abs((summary_table$Number_act_source2-summary_table$Check_value)/summary_table$Check_value)
+summary_table[1:2,"deviation_sc2"]<-0
+
+# make a plat of it:  Simple Horizontal Bar Plot with Added Labels 
+par(las=2) # make label text perpendicular to axis
+par(mar=c(5,8,4,2)) # increase y-axis margin.
+barplot(summary_table$deviation_sc1, main="Deviation of source OpenDis from expected values", horiz=TRUE, names.arg=c("Consultation","Imaging diagnostics","Inpatient surgery","Outpatient surgery","Nursing days","Outpatient admissions"),col="red2")
+
+par(las=2) # make label text perpendicular to axis
+par(mar=c(5,8,4,2)) # increase y-axis margin.
+barplot(summary_table$deviation_sc2, main="Deviation of source OpenDis from expected values", horiz=TRUE, names.arg=c("Consultation","Imaging diagnostics","Inpatient surgery","Outpatient surgery","Nursing days","Outpatient admissions"),col="red2")
 ```
 
 ##Summary and visualisation
@@ -234,20 +314,28 @@ Surgeries_outp <- Surgeries_3[,c("Age_gender_ID","Age", "Gender", "Outpatient_su
 colnames(Surgeries_outp) <- c("Age_gender_ID","Age", "Gender", "Number_of_act") # rename column
 Surgeries_outp$Type_act="Outpatient_surg" # add column
 
-Surgeries_4 <- rbind(Surgeries_inp,Surgeries_outp)
-
-# add total number of inhabitants per Age_gender_ID
+# add total number of inhabitants per Age_gender_ID in two seperate files for inpatient and outpatient surgeries
 
 # merge surgeries with a subset of Popindex that contains the data for 2014 and NL
 # note: shortcut of using 2014 population against 2010 numbers, because 2010 is not in the table
-Surgeries_def <- merge(Surgeries_4,subset(Pop_index, (Type.of.region=="Country"& Year=="2014"), select=c(Age_gender_ID,Population_x1000),drop=TRUE), by="Age_gender_ID")
+Surgeries_def_inp <- merge(Surgeries_inp,subset(Pop_index, (Type.of.region=="Country"& Year=="2014"), select=c(Age_gender_ID,Population_x1000),drop=TRUE), by="Age_gender_ID")
 
-Surgeries_def$Act_per_1000inhab <- as.numeric(Surgeries_def$Number_of_act) / as.numeric(Surgeries_def$Population_x1000)
+Surgeries_def_inp$Act_per_1000inhab <- as.numeric(Surgeries_def_inp$Number_of_act) / as.numeric(Surgeries_def_inp$Population_x1000)
 
 # add square meter requirement
-Surgeries_def$Space_per_act = BuildReq[which(BuildReq$Englisch.name.activity.cluster == "Surgeries"),"Total.normative.space"]
+Surgeries_def_inp$Space_per_act = BuildReq[which(BuildReq$Englisch.name.activity.cluster == "Surgeries"),"Total.normative.space"]
 
-visu(Surgeries_def,5)
+Surgeries_def_outp <- merge(Surgeries_outp,subset(Pop_index, (Type.of.region=="Country"& Year=="2014"), select=c(Age_gender_ID,Population_x1000),drop=TRUE), by="Age_gender_ID")
+
+Surgeries_def_outp$Act_per_1000inhab <- as.numeric(Surgeries_def_outp$Number_of_act) / as.numeric(Surgeries_def_outp$Population_x1000)
+
+# add square meter requirement
+Surgeries_def_outp$Space_per_act = BuildReq[which(BuildReq$Englisch.name.activity.cluster == "Surgeries"),"Total.normative.space"]
+
+
+visu(Surgeries_def_inp,5)
+visu(Surgeries_def_outp,5)
+
 ```
 
 The raw data with the admissions give information on the inpatient beds (the nursing days) and outpatient beds per patient and for each kind of medical act being performed being performed. We work the data in order to obtain a table with one column indexing all the different types of activities and their occurence, per age and gender type. This data. The data is extrated for the year 2012 only, which is the only one we want to work with (because the most recent).
@@ -281,19 +369,26 @@ Adm_outp3 <- aggregate(Number_of_act ~ .,Adm_outp2, sum)
 Adm_outp3$Type_act="Outpatient_admissions" # add column
 Adm_outp3$Space_per_act = BuildReq[which(BuildReq$Englisch.name.activity.cluster == "Day admissions"),"Total.normative.space"]
 
-Admissions_4 <- rbind(Adm_inp3,Adm_outp3)
-
 # add total number of inhabitants per Age_gender_ID
 
 # merge surgeries with a subset of Popindex that contains the data for 2014 and NL
 # note: shortcut of using 2014 population against 2010 numbers, because 2010 is not in the table
-Admissions_def <- merge(Admissions_4,subset(Pop_index, (Type.of.region=="Country"& Year=="2014"), select=c(Age_gender_ID,Population_x1000),drop=TRUE), by="Age_gender_ID")
+Admissions_def_inp <- merge(Adm_inp3,subset(Pop_index, (Type.of.region=="Country"& Year=="2014"), select=c(Age_gender_ID,Population_x1000),drop=TRUE), by="Age_gender_ID")
 
-Admissions_def$Act_per_1000inhab <- as.numeric(Admissions_def$Number_of_act) / as.numeric(Admissions_def$Population_x1000)
+Admissions_def_inp$Act_per_1000inhab <- as.numeric(Admissions_def_inp$Number_of_act) / as.numeric(Admissions_def_inp$Population_x1000)
 
-Admissions_def <- Admissions_def[,c("Age_gender_ID","Age","Gender","Number_of_act","Type_act","Population_x1000","Act_per_1000inhab","Space_per_act")]
+Admissions_def_inp <- Admissions_def_inp[,c("Age_gender_ID","Age","Gender","Number_of_act","Type_act","Population_x1000","Act_per_1000inhab","Space_per_act")]
 
-visu(Admissions_def,5)
+Admissions_def_outp <- merge(Adm_outp3,subset(Pop_index, (Type.of.region=="Country"& Year=="2014"), select=c(Age_gender_ID,Population_x1000),drop=TRUE), by="Age_gender_ID")
+
+Admissions_def_outp$Act_per_1000inhab <- as.numeric(Admissions_def_outp$Number_of_act) / as.numeric(Admissions_def_inp$Population_x1000)
+
+Admissions_def_outp <- Admissions_def_outp[,c("Age_gender_ID","Age","Gender","Number_of_act","Type_act","Population_x1000","Act_per_1000inhab","Space_per_act")]
+
+
+visu(Admissions_def_inp,5)
+visu(Admissions_def_outp,5)
+
 ```
 
 The last two activities we want insights on are the consultation and imaging diagnostics.The information is included in the raw data about the outpatient surgeries. we only want the data for the most recent year.
@@ -342,9 +437,9 @@ visu(Imaging_def,5)
 We finally obtain a table that we can work with, indexing total activites per 1000 inhabitant, per age, gender, region and that we will take as reference for the year 2014, allowing us to then project the future surface needs per activities from 2012 to 2040.
 ```{r echo=FALSE}
 
-
-Total_activities_2014 <- rbind.fill(Consultation_def, Imaging_def, Surgeries_def, Admissions_def)
+Total_activities_2014 <- rbind.fill(Admissions_def_outp,Surgeries_def_outp,Surgeries_def_inp, Consultation_def, Admissions_def_inp,Imaging_def)
 visu(Total_activities_2014,10)
+
 
 ```
 
@@ -369,10 +464,12 @@ cproj=c("Year", "Region", "Activity")
 
 Projection <- merge(subset(Pop_index, select=c(Age_gender_ID, Year, Region, Population_x1000 ),drop=TRUE), subset(Total_activities_2014, select=c(Age_gender_ID, Age,Gender, Type_act, Act_per_1000inhab, Space_per_act),drop=TRUE), by="Age_gender_ID")
  
-Projection$Total_space=round((Projection$Population_x1000)*(Projection$Act_per_1000inhab)* (Projection$Space_per_act),0) # Calculate total space needed for every activity in every agegroup for both gender 
+Projection$Space_x1000m2=round((Projection$Population_x1000)*(Projection$Act_per_1000inhab)* (Projection$Space_per_act)/1000,0) # Calculate total space needed for every activity in every agegroup for both gender 
 
 #subset per year, age group, gender, region and activity
-Projection<- subset(Projection, select = c(Age, Gender, Year, Region, Type_act, Total_space))
+
+Projection<- subset(Projection,select = c(Age,Gender,Year,Region,Type_act,Space_x1000m2))
+
 colnames(Projection)[colnames(Projection) == 'Type_act'] <- 'Activity' 
 visu(Projection,20)
 ```
@@ -381,7 +478,7 @@ Now that we have the detailed projections, we want sum the required surfaces on 
 ```{r, result, eval=TRUE, echo=FALSE}
 
 
-Result <-aggregate(Total_space ~ Year+Region+Activity,Projection,sum)
+Result <-aggregate(Space_x1000m2~ Year+Region+Activity,Projection,sum)
  
 visu(Result,20)
 ```
@@ -394,10 +491,20 @@ visu(Result,20)
 
 ```{r} 
 
+
 test<- matrix(c(2014,2015,2016,2014,2015,2016,"Diagnostics","Diagnostics","Diagnostics","Surgeries","Surgeries","Surgeries",10,12,19,11,13,17),nrow=6, ncol=3)
 colnames(test)<-c("Year", "Group", "Activity")
 test_graph <- data.frame(test)
 ggplot(test_graph, aes(x=Year,y=Activity,group=Group,fill=Group)) + geom_area() + geom_line(position='stack')
+
+library(ggplot2)
+Result_graph <- data.frame(subset(Result, (Region=="Nederland"), select=c("Year","Activity","Space_x1000m2"), drop=TRUE) )
+ggplot(Result_graph, aes(x=Year,y=Space_x1000m2,group=Activity,fill=Activity),order(Result_graph$Activity)) + geom_area(stat="identity") + geom_line(position='stack') + labs(title="Needed space per category in m2")
+Result_graph2 <- data.frame(subset(Result_graph_ordered, (Year==2015|Year==2020| Year==2025|Year==2030|Year==2035|Year==2040),select=c("Year","Activity","Space_x1000m2"), drop=TRUE))
+ggplot(Result_graph2, aes(x = Year, y = Space_x1000m2, fill = Activity, label = Space_x1000m2)) +
+  geom_bar(stat = "identity") +
+  geom_text(size = 2, position = position_stack(vjust = 0.2))
+
 ```
 
 
