@@ -157,7 +157,12 @@ print(head(Age_gender_ID,5))
 
 
 ##Sanity checks
-In the graphs below we show how
+In the graphs below we show how much the total number of activities from the two sources that we use, deviates from the values that we expected. The expected values are based on open sources that state how many surgeries, nursing days, outpatient admisssions, consultations and imaging diagnostics have taken place in 2014.
+Due tot he quality of these height level estimates and our data, a deviation up till 20% can be accepted. 
+We see some difference that are bigger, but we can explain these. In OpenDis we see less imaging diagnostics than we would expect. It could be that the reported number contains also imaging diagnostics done by private clinics, which we didn't include in our analysis. The inpatient surgeries number is too high, which is due to some activities that are classified as surgical, but are no stand-alone surgeries. This may cause the double counting by ~ 35%.
+
+In the CBS data we seem to underestimate the number of Outpatient surgeries and outpatient admissions. This is probably correct, because the CBS data is relatively old (from 2010 and 2012). The same effect explains the difference for inpatient surgeries. 
+
 ```{r, sanity_check, echo=FALSE}
 #we make a table that summarizes the total number of operations and compare them to what they should be roughly
 #we'll cheat by using the final table to the sanity check at the end
@@ -193,33 +198,34 @@ summary_table[which(summary_table$Type_act == "Outpatient_surg"),"Number_act_sou
 
 #number of surgeries (inpatient and outpatient), outpatient admissions and nursing days from more detailed CBS source
 
-summary_table[which(summary_table$Type_act == "Inpatient_surg"),"Number_act_source2"] <- sum(subset(Surgeries, Year == "2010", select="Inpatient_surgeries"))
+summary_table[which(summary_table$Type_act == "Inpatient_surg"),"Number_act_source2"] <- sum(subset(Surgeries, (Year == "2010" & Surgery=="All"), select="Inpatient_surgeries"))
 
-summary_table[which(summary_table$Type_act == "Outpatient_surg"),"Number_act_source2"] <- sum(subset(Surgeries, Year == "2010", select="Outpatient_surgeries"))
+summary_table[which(summary_table$Type_act == "Outpatient_surg"),"Number_act_source2"] <- sum(subset(Surgeries, (Year == "2010" & Surgery=="All"), select="Outpatient_surgeries"))
 
 Admissions$Outpatient_admissions_total <- Admissions$Outpatient_admissions_per_10000_inhabitants*Admissions$Average_poulation/10000
 
 Admissions$Nursingdays_total<-Admissions$Nursingdays_per_10000_inhabitants*Admissions$Average_poulation/10000
 
-summary_table[which(summary_table$Type_act == "Outpatient_admissions"),"Number_act_source2"] <- sum(subset(Admissions, Year == "2012*", select="Outpatient_admissions_total"))
+summary_table[which(summary_table$Type_act == "Outpatient_admissions"),"Number_act_source2"] <- sum(subset(Admissions, Year == "2012*" , select="Outpatient_admissions_total"))
 
 summary_table[which(summary_table$Type_act == "Nursing_days"),"Number_act_source2"] <- sum(subset(Admissions, Year == "2012*", select="Nursingdays_total"))
 
-summary_table[,"Check_value"]<-c(29400000,12000000,1100000,1400000,9200000,1800000)
+summary_table[,"Check_value"]<-c(29400000,12000000,1000000,1500000,9200000,1800000)
 
 #calculate the difference between expected and true value
-summary_table$deviation_sc1 <-  abs((summary_table$Number_act_source1-summary_table$Check_value)/summary_table$Check_value)
-summary_table$deviation_sc2 <- abs((summary_table$Number_act_source2-summary_table$Check_value)/summary_table$Check_value)
+summary_table$deviation_sc1 <-  (summary_table$Number_act_source1-summary_table$Check_value)/summary_table$Check_value
+summary_table$deviation_sc2 <- (summary_table$Number_act_source2-summary_table$Check_value)/summary_table$Check_value
 summary_table[1:2,"deviation_sc2"]<-0
 
 # make a plat of it:  Simple Horizontal Bar Plot with Added Labels 
+summary_table <- summary_table[order(summary_table$deviation_sc1,decreasing=TRUE),] #order
 par(las=2) # make label text perpendicular to axis
 par(mar=c(5,8,4,2)) # increase y-axis margin.
-barplot(summary_table$deviation_sc1, main="Deviation of source OpenDis from expected values", horiz=TRUE, names.arg=c("Consultation","Imaging diagnostics","Inpatient surgery","Outpatient surgery","Nursing days","Outpatient admissions"),col="red2")
+barplot(summary_table$deviation_sc1, main="Deviation of source OpenDis from expected values", horiz=TRUE, names.arg=summary_table$Type_act,col=c("green2","red2","red2","red2","red2","red2"))
 
 par(las=2) # make label text perpendicular to axis
 par(mar=c(5,8,4,2)) # increase y-axis margin.
-barplot(summary_table$deviation_sc2, main="Deviation of source OpenDis from expected values", horiz=TRUE, names.arg=c("Consultation","Imaging diagnostics","Inpatient surgery","Outpatient surgery","Nursing days","Outpatient admissions"),col="red2")
+barplot(summary_table$deviation_sc2, main="Deviation of source CBS from expected values", horiz=TRUE, names.arg=summary_table$Type_act,col=c("red2","red2","green2","green2","red2","red2"))
 ```
 
 ##Summary and visualisation
