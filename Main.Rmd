@@ -398,7 +398,7 @@ head(Imaging_def,5)
 ```{r}
 library(plyr)
 
-Total_activities_2014 <- rbind.fill(Consultation_def, Imaging_def, Surgeries_def, Admissions_def)
+Total_activities_2014 <- rbind.fill(Admissions_def_outp,Surgeries_def, Imaging_def, Consultation_def, Admissions_def_inp)
 
 ```
 
@@ -457,7 +457,7 @@ print(head(Result, 10))
 ```{r} 
 library(ggplot2)
 Result_graph <- data.frame(subset(Result, (Region=="Nederland"), select=c("Year","Activity","Space_x1000m2"), drop=TRUE) )
-ggplot(Result_graph_sorted, aes(x=Year,y=Space_x1000m2,group=Activity,fill=Activity)) + geom_area() + geom_line(position='stack')
+ggplot(Result_graph, aes(x=Year,y=Space_x1000m2,group=Activity,fill=Activity)) + geom_area() + geom_line(position='stack')
 Result_graph2 <- data.frame(subset(Result_graph, (Year==2015|Year==2020| Year==2025|Year==2030|Year==2035|Year==2040),select=c("Year","Activity","Space_x1000m2"), drop=TRUE))
 ggplot(Result_graph2, aes(x = Year, y = Space_x1000m2, fill = Activity, label = Space_x1000m2)) +
   geom_bar(stat = "identity") +
