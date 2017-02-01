@@ -496,14 +496,6 @@ visu(Result,20)
 [...some textual explanation of it...]
 
 ```{r echo=FALSE} 
-
-
-test<- matrix(c(2014,2015,2016,2014,2015,2016,"Diagnostics","Diagnostics","Diagnostics","Surgeries","Surgeries","Surgeries",10,12,19,11,13,17),nrow=6, ncol=3)
-colnames(test)<-c("Year", "Group", "Activity")
-test_graph <- data.frame(test)
-ggplot(test_graph, aes(x=Year,y=Activity,group=Group,fill=Group)) + geom_area() + geom_line(position='stack')
-
-
 Activity_order <- matrix(c("Consultation","Imaging diagnostics","Inpatient_surg","Outpatient_surg", "Nursing_days","Outpatient_admissions",5,4,1,2,6,3),nrow=6,ncol=2)
 colnames(Activity_order) <-c("Activity","Number")
 Result_graph <- data.frame(subset(Result, (Region=="Nederland"), select=c("Year","Activity","Space_x1000m2"), drop=TRUE) )
