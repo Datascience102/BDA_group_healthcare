@@ -39,14 +39,15 @@ A number of stakeholders would use these predictions for their decision-making p
 4.	(Local) governments: assessing financing decision for (part of) the build, assessing whether care is sufficiently ensured for the inhabitants
 
 #**Part 2.** Process
-We follow a number of predefined steps in this project:
+We follow a number of predefined steps in this project, which can be grouped in thre three categories: getting the data ready, doing the calculations, and showing the results. The process is:
 
-1.	Collect data from the different sources
-2.	Clean the data (for example remove double headers)
-3.	Do sanity checks and cross check the data against each other (for example, there should be ~17M people in 2017 in the country)
-4.	Visualize and summarize the data
-5.	Check how data can be matched and which assumptions are needed (for example for outpatient visits, we don’t have information on age and gender, so we will assume that distribution is equal to that of outpatient admissions)
-6.	Perform calculations:
+1.	Getting the data ready
+    a.  Collect data from the different sources
+    b.  Clean the data (for example remove double headers)
+    c.  Do sanity checks and cross check the data against each other (for example, there should be ~17M people in 2017 in the country)
+    d.  Visualize and summarize the data
+    e.  Check how data can be matched and which assumptions are needed (for example for outpatient visits, we don’t have information on age and gender, so we will assume that distribution is equal to that of outpatient admissions)
+2.	Perform calculations
     a.	Count number of activities in 6 categories (outpatient admissions, inpatient nursing days, outpatient surgeries, inpatient surgeries, outpatient visits, imaging diagnostics) per region, age and gender
     b.	Multiply number of activities with the corresponding space requirement in m2 to get required m2 per type of space, region in Netherlands, gender and age
     c.	Multiply with demography developments to get required m2 per type of space, region in Netherlands, gender and age for the years 2018-2040.
@@ -456,8 +457,9 @@ visu(Total_activities_2014,10)
 
 
 ##Assumptions
-We had to make a number of assumptions, because the data is not as complete as we would wish:
-1.  Since the surgery data is only available up till 2010, we needed to assume that this is still representative for 2014. The same holds for admissions till 2012.
+We had to make a number of assumptions, because the data is not as complete as hoped for:
+
+1.	Since the surgery data is only available up till 2010, we needed to assume that this is still representative for 2014. The same holds for admissions till 2012.
 2.  We assume that the current state of care does not change, only the population size and distribution of age-gender changes. However, in reality we would expect innovation to change the form of care and days we spend in a hospital to change as well.
 3.  We made a shortcut by using different years for different types of activities (ranging from 2010 to 2014), but applying the same number of inhabitants (namely of the year 2014) to it. This made calculations much easier and was the available data. The impact of this is probably very small, due to the fact that population does not change to much in 4 years.
 4.  For the consultations and imaging diagnostics we had to make an assumption on how the total number of activities is currently distributed over age-gender, because we don't have this level of detail in the data. We assumed that these activities are the same distributed as outpatient admissions.
