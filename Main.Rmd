@@ -1,7 +1,7 @@
 ---
 title: "Main"
 author: "Group work Busschers, Dherbomez, Mather, Van der Meer"
-date: "30 Jan 2017"
+date: "1 Feb 2017"
 output:
   html_document: default
   pdf_document: default
@@ -79,7 +79,7 @@ visu(Pop,5)
 The second dataset provides the surface requirement in m² for the various activities that need to be performed 
 ```{r, echo=FALSE}
 # m2 required per activity
-BuildReq <- read.csv("Data/Bouwcollege - m2 per activity.csv", header = TRUE, sep=",")
+BuildReq <- read.csv("Data/Bouwcollege - m2 per activity_v2.csv", header = TRUE, sep=",")
 visu(BuildReq,5)
 ```
 
@@ -244,12 +244,13 @@ summary_table[1:2,"deviation_sc2"]<-0
 
 # make a plat of it:  Simple Horizontal Bar Plot with Added Labels 
 summary_table <- summary_table[order(summary_table$deviation_sc1,decreasing=TRUE),] #order
+
 par(las=2) # make label text perpendicular to axis
-par(mar=c(5,8,4,2)) # increase y-axis margin.
+par(mar=c(5,10,6,3)) # increase y-axis margin.
 barplot(summary_table$deviation_sc1, main="Deviation of source OpenDis from expected values", horiz=TRUE, names.arg=summary_table$Type_act,col=c("green2","red2","red2","red2","red2","red2"))
 
 par(las=2) # make label text perpendicular to axis
-par(mar=c(5,8,4,2)) # increase y-axis margin.
+par(mar=c(5,10,6,3)) # increase y-axis margin.
 barplot(summary_table$deviation_sc2, main="Deviation of source CBS from expected values", horiz=TRUE, names.arg=summary_table$Type_act,col=c("red2","red2","green2","green2","red2","red2"))
 ```
 
@@ -304,7 +305,7 @@ Pop_index <- aggregate(Population_x1000 ~ .,Pop_index_temp, sum)
 ```
 
 
-The surgeries contain information for two of our six defined usages: inpatient and outpatient operating rooms (surgeries). For each gender or age group, we index the number of activities performed per 1000 inhabitant and the required corresponding surface.
+The surgeries contain information for two of our six defined usages: inpatient and outpatient operating rooms (surgeries). For each gender or age group, we index the number of surgeries performed per 10,000 inhabitant and the required corresponding surface.
 
 ```{r, SurgeriesTable, echo=FALSE}
 # select all rows for which the column surgeries says 'all', year=2010
@@ -347,7 +348,7 @@ visu(Surgeries_def_outp,5)
 
 ```
 
-The raw data with the admissions give information on the inpatient beds (the nursing days) and outpatient beds per patient and for each kind of medical act being performed being performed. We work the data in order to obtain a table with one column indexing all the different types of activities and their occurence, per age and gender type. This data. The data is extrated for the year 2012 only, which is the only one we want to work with (because the most recent).
+The raw data with the admissions give information on the needed inpatient beds (the nursing days) and outpatient beds (beds used for day admissions) per 10,000 inhabitant. We work the data in order to obtain a table with one column indexing all the different types of activities and their occurence, per age and gender type. The data is extrated for the year 2012 only, because we want to forecast based on the most recent available data.
 
 ```{r, AdmissionsTable, echo=FALSE}
 # select all rows for which the column year=2012
@@ -400,7 +401,7 @@ visu(Admissions_def_outp,5)
 
 ```
 
-The last two activities we want insights on are the consultation and imaging diagnostics.The information is included in the raw data about the outpatient surgeries. we only want the data for the most recent year.
+The last two activities we want insights on are the consultation and imaging diagnostics. The information is included in the raw data with all healthcare activities that are claimed at the Dutch insurance companies. We will use the most recent year that has been (almost) fully claimed, which is the year 2014.
 
 ```{r echo=FALSE} 
 Consultation_imaging_ref <- subset(Surgeries_outp, select=c("Age_gender_ID","Age","Gender","Number_of_act"), drop=TRUE)
@@ -443,7 +444,7 @@ visu(Consultation_def,5)
 visu(Imaging_def,5)
 
 ```
-We finally obtain a table that we can work with, indexing total activites per 1000 inhabitant, per age, gender, region and that we will take as reference for the year 2014, allowing us to then project the future surface needs per activities from 2012 to 2040.
+We finally obtain a table that we can work with, indexing total activites per 10,000 inhabitant, per age, gender, region and that we will take as reference for the year 2014, allowing us to then project the future surface needs per activities from 2014 to 2040.
 ```{r echo=FALSE}
 
 Total_activities_2014 <- rbind.fill(Admissions_def_outp,Surgeries_def_outp,Surgeries_def_inp, Consultation_def, Admissions_def_inp,Imaging_def)
@@ -455,7 +456,11 @@ visu(Total_activities_2014,10)
 
 
 ##Assumptions
-[...write about the assumptions that we have to make..]
+We had to make a number of assumptions, because the data is not as complete as we would wish:
+1.  Since the surgery data is only available up till 2010, we needed to assume that this is still representative for 2014. The same holds for admissions till 2012.
+2.  We assume that the current state of care does not change, only the population size and distribution of age-gender changes. However, in reality we would expect innovation to change the form of care and days we spend in a hospital to change as well.
+3.  We made a shortcut by using different years for different types of activities (ranging from 2010 to 2014), but applying the same number of inhabitants (namely of the year 2014) to it. This made calculations much easier and was the available data. The impact of this is probably very small, due to the fact that population does not change to much in 4 years.
+4.  For the consultations and imaging diagnostics we had to make an assumption on how the total number of activities is currently distributed over age-gender, because we don't have this level of detail in the data. We assumed that these activities are the same distributed as outpatient admissions.
 
 ##Implementation
 
@@ -483,7 +488,7 @@ colnames(Projection)[colnames(Projection) == 'Type_act'] <- 'Activity'
 visu(Projection,20)
 ```
 
-Now that we have the detailed projections, we want sum the required surfaces on the Age and Gender to obtain statistics pe Region and Activity
+Now that we have the detailed projections, we want sum the required surfaces on the Age and Gender to obtain statistics per Region and Activity.
 ```{r, result, eval=TRUE, echo=FALSE}
 
 
@@ -549,4 +554,4 @@ We can use the same process for different data sets and purposes:
 3.  Refining for specific parts of the country, for example the care region of a hospital
 4.  Refining for specializations
 5.  Different types of care, such as youth care. Activities are different and space requirements as well, but the process is the same
-6.  Alternative ‘weighting’ of activities. By using m2 to weight the 6 different types of care, we get a physical result, but we could also weight the activities with average cost to forecast future health expenditure.
+6.  Alternative ‘weighting’ of activities. By using m2 to weight the 6 different types of care, we get a physical result, but we could also weight the activities with average expenditure to forecast future health expenditure. Another option would be to use the investment cost per m2 of different spaces to come up with the total investment required for a hospital in a specific region.
