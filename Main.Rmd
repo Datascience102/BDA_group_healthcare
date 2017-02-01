@@ -1,5 +1,5 @@
 ---
-title: "Main"
+title: "Prediction of Hospital capacity needs"
 author: "Group work Busschers, Dherbomez, Mather, Van der Meer"
 date: "1 Feb 2017"
 output:
