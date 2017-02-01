@@ -105,6 +105,7 @@ header=TRUE, sep=",",dec=".",stringsAsFactors = FALSE, na=0)
 
 visu(Surgeries,5)
 
+options(warn = -1) # we get NA warning, which we are aware off, but can not silence
 Surgeries$Total_surgeries<-as.numeric(as.character(Surgeries$Total_surgeries))
 Surgeries$Total_surgeries_per_10000_inhabitants<-as.numeric(as.character(Surgeries$Total_surgeries_per_10000_inhabitants))
 Surgeries$Inpatient_surgeries<-as.numeric(as.character(Surgeries$Inpatient_surgeries))
@@ -118,6 +119,8 @@ Surgeries$Inpatient_surgeries[is.na(Surgeries$Inpatient_surgeries)]<-0
 Surgeries$Inpatient_surgeries_per_10000_inhabitants[is.na(Surgeries$Inpatient_surgeries_per_10000_inhabitants)]<-0
 Surgeries$Outpatient_surgeries[is.na(Surgeries$Outpatient_surgeries)]<-0
 Surgeries$Outpatient_surgeries_per_10000_inhabitants[is.na(Surgeries$Outpatient_surgeries_per_10000_inhabitants)]<-0
+
+
                
 ```
 
